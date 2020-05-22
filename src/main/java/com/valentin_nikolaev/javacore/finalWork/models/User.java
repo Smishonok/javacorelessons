@@ -26,6 +26,14 @@ public class User {
         this.role      = DEFAULT;
     }
 
+
+    //Not ended!
+//    private User(String firstName, String lastName, String region, String role) {
+//        this(firstName, lastName);
+//
+//        changeUserRole(role);
+//    }
+
     public int getId() {
         return id;
     }
