@@ -3,12 +3,12 @@ package com.valentin_nikolaev.javacore.finalWork.models;
 import java.time.LocalDateTime;
 
 public class Post {
-    private int           id;
+    private long           id;
     private String        content;
     private LocalDateTime created;
     private LocalDateTime updated;
 
-    private static int groupID = 0;
+    private static long groupID = 0;
 
     {
         groupID++;
@@ -21,7 +21,7 @@ public class Post {
         this.updated = this.created;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

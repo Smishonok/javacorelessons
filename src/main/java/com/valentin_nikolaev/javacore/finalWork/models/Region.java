@@ -1,15 +1,15 @@
 package com.valentin_nikolaev.javacore.finalWork.models;
 
 public class Region {
-    private int id;
+    private long id;
     private String name;
 
-    public Region(int id, String name) {
+    public Region(long id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
