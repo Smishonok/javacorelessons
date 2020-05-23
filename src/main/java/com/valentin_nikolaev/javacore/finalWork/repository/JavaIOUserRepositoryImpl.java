@@ -9,7 +9,7 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
 
 
     @Override
-    public void add(Long id) {
+    public void add(User user) {
 
     }
 

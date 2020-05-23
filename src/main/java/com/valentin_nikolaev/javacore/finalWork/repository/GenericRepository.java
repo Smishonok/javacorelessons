@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface GenericRepository<T,ID> {
 
-    void add(ID id);
+    void add(T entity);
 
     T get(ID id);
 
