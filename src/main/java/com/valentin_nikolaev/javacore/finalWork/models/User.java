@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Objects;
 
 public class User {
-    private int    id;
+    private long    id;
     private String firstName;
     private String lastName;
     private Region region;
     private Role   role;
-    List<Post> posts = new ArrayList<>();
+    List<Post> posts;
 
-    private static int  groupId = 0;
+    private static long  groupId = 0;
     private final  Role DEFAULT = Role.USER;
 
     {
@@ -24,17 +24,11 @@ public class User {
         this.firstName = firstName;
         this.lastName  = lastName;
         this.role      = DEFAULT;
+        this.posts = new ArrayList<>();
     }
 
 
-    //Not ended!
-//    private User(String firstName, String lastName, String region, String role) {
-//        this(firstName, lastName);
-//
-//        changeUserRole(role);
-//    }
-
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -44,6 +38,10 @@ public class User {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public Region getRegion() {
+        return region;
     }
 
     public Role getRole() {
@@ -60,6 +58,10 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public void setRegion(Region region) {
+        this.region = region;
     }
 
     public void changeUserRole(String role) {
