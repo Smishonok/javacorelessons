@@ -6,14 +6,16 @@ public class Region {
 
     private static long groupId = 0;
 
-    {
-        groupId++;
-        this.id = groupId;
-    }
-
     public Region(String name) {
+        this.id = ++ groupId;
         this.name = name;
     }
+
+    public Region(long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
 
     public long getId() {
         return id;
