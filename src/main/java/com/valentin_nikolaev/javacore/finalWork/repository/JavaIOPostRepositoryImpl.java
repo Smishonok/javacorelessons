@@ -30,4 +30,14 @@ public class JavaIOPostRepositoryImpl implements PostRepository{
     public void removeAll() {
 
     }
+
+    @Override
+    public List<Post> getPostsByUserId(Long userId) {
+        return null;
+    }
+
+    @Override
+    public void removePostsByUserId(Long userId) {
+
+    }
 }
