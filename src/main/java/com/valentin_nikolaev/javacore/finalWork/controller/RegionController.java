@@ -62,7 +62,7 @@ public class RegionController {
             Region targetRegion = regionsMapWithKeyNames.get(name);
             return targetRegion;
         } else {
-            log.error("Illegal region name. The region with name '" + name + "' isn`t exists in " +
+            log.error("Illegal region name. The region with name '" + name + "' isn`t contains in" +
                               "repository. Before calling this method need to check is repository" +
                               " contains the region with the calling name.");
             throw new IllegalArgumentException();
@@ -75,7 +75,7 @@ public class RegionController {
             Region targetRegion = regionMapWithKeyIds.get(id);
             return targetRegion;
         } else {
-            log.error("Illegal region id. The region with id '" + id + "' isn`t exists in " +
+            log.error("Illegal region id. The region with id '" + id + "' isn`t contains in " +
                               "repository. Before calling this method need to check is repository" +
                               " contains the region with the calling id.");
             throw new IllegalArgumentException();

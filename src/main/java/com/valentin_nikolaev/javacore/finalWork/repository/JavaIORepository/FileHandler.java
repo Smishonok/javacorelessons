@@ -35,12 +35,12 @@ public class FileHandler {
     public String getDataById(long id) {
         String dataLine = "";
 
-        boolean firstMathFound = false;
+        boolean firstMatchFound = false;
         try (BufferedReader reader = new BufferedReader(new FileReader(handledFile))) {
-            while (! firstMathFound && reader.read() > 0) {
+            while (! firstMatchFound && reader.read() > 0) {
                 dataLine = reader.readLine();
-                if (isDataLineConsistsId(id, dataLine)) {
-                    firstMathFound = true;
+                if (isDataLineContainsId(id, dataLine)) {
+                    firstMatchFound = true;
                 }
             }
         } catch (FileNotFoundException e) {
@@ -83,7 +83,7 @@ public class FileHandler {
                 new FileReader(handledFile, Charset.forName("UTF-8")))) {
             while (reader.read() > 0) {
                 String dataLine = reader.readLine();
-                if (! isDataLineConsistsId(id, dataLine)) {
+                if (! isDataLineContainsId(id, dataLine)) {
                     data.append(dataLine);
                 }
             }
@@ -96,7 +96,7 @@ public class FileHandler {
         return data.toString();
     }
 
-    private boolean isDataLineConsistsId(long id, String dataLine) {
+    private boolean isDataLineContainsId(long id, String dataLine) {
         String[] dataArray = dataLine.split(",");
         long     parsedId  = Long.parseLong(dataArray[0]);
         return id == parsedId;
