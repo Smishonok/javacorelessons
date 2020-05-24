@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Objects;
 
 public class User {
-    private long    id;
+    private long   id;
     private String firstName;
     private String lastName;
     private Region region;
     private Role   role;
     List<Post> posts;
 
-    private static long  groupId = 0;
+    private static long groupId = 0;
     private final  Role DEFAULT = Role.USER;
 
     {
@@ -24,7 +24,7 @@ public class User {
         this.firstName = firstName;
         this.lastName  = lastName;
         this.role      = DEFAULT;
-        this.posts = new ArrayList<>();
+        this.posts     = new ArrayList<>();
     }
 
 

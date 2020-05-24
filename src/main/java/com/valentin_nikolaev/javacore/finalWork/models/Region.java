@@ -4,8 +4,14 @@ public class Region {
     private long id;
     private String name;
 
-    public Region(long id, String name) {
-        this.id = id;
+    private static long groupId = 0;
+
+    {
+        groupId++;
+        this.id = groupId;
+    }
+
+    public Region(String name) {
         this.name = name;
     }
 

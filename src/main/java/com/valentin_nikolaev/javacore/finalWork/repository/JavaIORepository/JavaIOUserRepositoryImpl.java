@@ -1,6 +1,7 @@
-package com.valentin_nikolaev.javacore.finalWork.repository;
+package com.valentin_nikolaev.javacore.finalWork.repository.JavaIORepository;
 
 import com.valentin_nikolaev.javacore.finalWork.models.User;
+import com.valentin_nikolaev.javacore.finalWork.repository.UserRepository;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
 
     @Override
     public User get(Long id) {
+
         return null;
     }
 
@@ -25,6 +27,7 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> getAll() {
+
         return null;
     }
 
