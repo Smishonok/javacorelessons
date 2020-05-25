@@ -7,7 +7,7 @@ interface StringFunc {
 class StringTrimmer {
     public static String trimWhitSpace(String s) {
         String newString = "";
-        char trimVar = ' ';
+        char   trimVar   = ' ';
         char[] chars     = s.toCharArray();
 
         for (char ch : chars) {
@@ -48,9 +48,8 @@ public class LambdaAsParam {
         outStr = stringOp(StringTrimmer::trimWhitSpace, inStr);
         System.out.println(outStr);
 
-        //The final will stay the variables which using in the body of anonymous function and is
-        // not the function parameters. The function`s param will stay normal (not final)
-        // variables.
+        //The variable will become final if it will use in the body of the anonymous function and
+        // will not be the parameter of that function.
         StringFunc stringFunc = new StringFunc() {
             @Override
             public String func(String s) {
