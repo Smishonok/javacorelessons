@@ -31,7 +31,7 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
 
     @Override
     public void remove(Long id) {
-        fileHandler.removeDataById(id);
+        fileHandler.removeDataWithId(id);
     }
 
     @Override
@@ -39,8 +39,10 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
         List<Region> regions   = new ArrayList<>();
         List<String> dataLines = fileHandler.getAllDataLines();
 
-        for (String dataLine : dataLines) {
-            regions.add(parseDataLine(dataLine));
+        if (dataLines.size()>0) {
+            for (String dataLine : dataLines) {
+                regions.add(parseDataLine(dataLine));
+            }
         }
 
         return regions;

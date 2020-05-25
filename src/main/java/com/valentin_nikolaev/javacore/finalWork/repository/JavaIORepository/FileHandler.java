@@ -52,7 +52,7 @@ public class FileHandler {
         return dataLine;
     }
 
-    public void removeDataById(long id) {
+    public void removeDataWithId(long id) {
         String dataAfterRemoving = getDataExcludeId(id);
         this.addDataIntoFile(dataAfterRemoving, false);
     }
