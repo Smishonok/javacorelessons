@@ -35,17 +35,17 @@ public final class RepositoryManager {
 
     private static String getRepositoryFactoryName() {
         log.debug("Choosing the repository factory, which will used.");
-        String repositoryFactory;
+        String repositoryFactoryName;
         if (isConfigFileExists()) {
             log.debug("Getting the repository factory`s name from config file.");
             Properties config = getProperties();
-            repositoryFactory = config.getProperty("RepositoryFactory", DEFAULT_REPOSITORY_FACTORY);
+            repositoryFactoryName = config.getProperty("RepositoryFactory", DEFAULT_REPOSITORY_FACTORY);
         } else {
             log.debug("Getting the default repository factory`s name.");
-            repositoryFactory = DEFAULT_REPOSITORY_FACTORY;
+            repositoryFactoryName = DEFAULT_REPOSITORY_FACTORY;
         }
-        log.debug("Chosen repository factory`s name is: "+ repositoryFactory);
-        return repositoryFactory;
+        log.debug("Chosen repository factory`s name is: "+ repositoryFactoryName);
+        return repositoryFactoryName;
     }
 
     private static boolean isConfigFileExists() {

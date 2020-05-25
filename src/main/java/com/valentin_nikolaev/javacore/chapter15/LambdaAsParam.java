@@ -62,7 +62,7 @@ public class LambdaAsParam {
             return str + inStr;
         };
 
-
+        
     }
 
 
