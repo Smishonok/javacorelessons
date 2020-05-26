@@ -1,69 +1,35 @@
 package com.valentin_nikolaev.javacore.chapter15;
 
-interface StringFunc {
-    String func(String s);
-}
-
-class StringTrimmer {
-    public static String trimWhitSpace(String s) {
-        String newString = "";
-        char   trimVar   = ' ';
-        char[] chars     = s.toCharArray();
-
-        for (char ch : chars) {
-            if (ch != trimVar) {
-                newString += ch;
-            }
-        }
-
-        return newString;
-    }
+interface StringFunctionForParam {
+    String func(String s1, String s2);
 }
 
 public class LambdaAsParam {
 
-    private static String stringOp(StringFunc sf, String s) {
-        return sf.func(s);
+    private static String stringOp(StringFunctionForParam sf, String s1, String s2) {
+        return sf.func(s1, s2);
+    }
+
+    private static String toUpperCase(String s1, String s2) {
+        return s1.toUpperCase() + "\n" + s2.toUpperCase();
     }
 
     public static void main(String[] args) {
-
-        String inStr = "Is lambda a good chose?";
+        String inStr1 = "Is lambda a good chose?";
+        String inStr2 = "I like lambda!";
         String outStr;
 
-        System.out.println(inStr);
-
-        outStr = stringOp(new StringFunc() {
+        outStr = stringOp(new StringFunctionForParam() {
             @Override
-            public String func(String s) {
-                return s.toUpperCase();
+            public String func(String s1, String s2) {
+                return s1 + "\n" + s2;
             }
-        }, inStr);
-        System.out.println(outStr);
+        }, inStr1, inStr2);
 
-        outStr = stringOp(str->str.toUpperCase(), inStr);
-        //the same - outStr = stringOp(String::toUpperCase, inStr);
-        System.out.println(outStr);
+        StringFunctionForParam concat = (s1, s2)->(s1 + "\n" + s2);
+        outStr = stringOp(concat, inStr1, inStr2);
 
-        outStr = stringOp(StringTrimmer::trimWhitSpace, inStr);
-        System.out.println(outStr);
+        outStr = stringOp(LambdaAsParam::toUpperCase, inStr1, inStr2);
 
-        //The variable will become final if it will use in the body of the anonymous function and
-        // will not be the parameter of that function.
-        StringFunc stringFunc = new StringFunc() {
-            @Override
-            public String func(String s) {
-                return s + inStr;
-            }
-        };
-
-        //the same above
-        StringFunc stringFunc1 = str->{
-            return str + inStr;
-        };
-
-        
     }
-
-
 }
