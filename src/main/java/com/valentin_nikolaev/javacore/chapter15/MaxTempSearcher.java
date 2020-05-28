@@ -4,18 +4,18 @@ interface GenericInterface<T> {
     boolean func(T v1, T v2);
 }
 
-public class WeatherSearcher {
+public class MaxTempSearcher {
     int maxTemp;
 
-    public WeatherSearcher(int maxTemperature) {
+    public MaxTempSearcher(int maxTemperature) {
         this.maxTemp = maxTemperature;
     }
 
-    public boolean isTheSame(WeatherSearcher weatherSearcher) {
+    public boolean isTheSame(MaxTempSearcher weatherSearcher) {
         return this.maxTemp == weatherSearcher.maxTemp;
     }
 
-    public boolean isLessThen(WeatherSearcher weatherSearcher) {
+    public boolean isLessThen(MaxTempSearcher weatherSearcher) {
         return this.maxTemp < weatherSearcher.maxTemp;
     }
 
@@ -36,12 +36,12 @@ class WeatherSearcher2 {
 
     public static void main(String[] args) {
 
-        WeatherSearcher[] weatherData = {new WeatherSearcher(83), new WeatherSearcher(42),
-                new WeatherSearcher(58), new WeatherSearcher(83), new WeatherSearcher(71),
-                new WeatherSearcher(64)};
+        MaxTempSearcher[] weatherData = {new MaxTempSearcher(83), new MaxTempSearcher(42),
+                new MaxTempSearcher(58), new MaxTempSearcher(83), new MaxTempSearcher(71),
+                new MaxTempSearcher(64)};
 
         int count;
-        count = counter(weatherData, WeatherSearcher::isLessThen, new WeatherSearcher(64));
+        count = counter(weatherData, MaxTempSearcher::isLessThen, new MaxTempSearcher(64));
 
 
     }
