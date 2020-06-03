@@ -108,12 +108,23 @@ public class StreamsExamples1 {
                 user->user.getAge() > 30).count();
         System.out.println("Females with age more then 30 years: " + femaleUsersWithAgeMore);
 
-        Optional<User> femaleWithMaxAge = users.stream().filter(User::isFemale).max(User::compareByAge);
-        System.out.println("Female with max age is: \n\t"+femaleWithMaxAge.get().toString());
+        Optional<User> femaleWithMaxAge = users.stream().filter(User::isFemale).max(
+                User::compareByAge);
+        System.out.println("Female with max age is: \n\t" + femaleWithMaxAge.get().toString());
 
-        List<String> usersGender = users.stream().map(user -> "\nUser name: "+user.getName()+
-                "\tUser gender: "+user.getGender().toString()).collect(Collectors.toList());
+        List<String> usersGender = users.stream().map(
+                user->"\nUser name: " + user.getName() + "\tUser gender: " +
+                        user.getGender().toString()).collect(Collectors.toList());
         usersGender.stream().forEach(System.out::print);
+
+        System.out.println("\n");
+        Map<String, User> usersMap = users.parallelStream().collect(HashMap::new, (map, user)->map
+                .put(user.getName(), user), (map1, map2)->map1.putAll(map2));
+
+        Map<String, User> usersMap2 = users.parallelStream().collect(HashMap::new, (map, user)->map
+                .put(user.getName(), user), HashMap::putAll);
+
+        System.out.println("User from user map: " + usersMap.get("Valentin").toString());
 
     }
 
