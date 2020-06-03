@@ -1,5 +1,6 @@
 package com.valentin_nikolaev.javacore.chapter29;
 
+import java.awt.desktop.SystemEventListener;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -125,6 +126,12 @@ public class StreamsExamples1 {
                 .put(user.getName(), user), HashMap::putAll);
 
         System.out.println("User from user map: " + usersMap.get("Valentin").toString());
+
+
+        boolean isContainsUserWithAgeAbove = users.stream().anyMatch(user->user.getAge() > 30);
+        System.out.println(isContainsUserWithAgeAbove);
+        boolean allUsersWithAgeBelow12 = users.stream().allMatch(user->user.getAge() < 12);
+        System.out.println(allUsersWithAgeBelow12);
 
     }
 
