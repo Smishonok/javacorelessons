@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,27 +35,42 @@ public class ChannelsExample {
             e.printStackTrace();
         }
 
+        try (FileChannel fileChannel = (FileChannel) Files.newByteChannel(fileForWritingFromChannel,
+                                                                          StandardOpenOption.CREATE,
+                                                                          StandardOpenOption.WRITE,
+                                                                          StandardOpenOption.READ)) {
+            long fileSize = fileChannel.size();
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, fileSize,
+                                                                fileSize*2);
+            mappedByteBuffer.put(byteArray);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         String textFromFile = "";
-//        try (SeekableByteChannel channel = Files.newByteChannel(fileForWritingFromChannel,
-//                                                                StandardOpenOption.READ)) {
-//            if (channel.read(buffer) != - 1) {
-//                buffer.rewind();
-//                textFromFile += new String(buffer.array());
-//            }
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        //        try (SeekableByteChannel channel = Files.newByteChannel(fileForWritingFromChannel,
+        //                                                                StandardOpenOption.READ)) {
+        //            if (channel.read(buffer) != - 1) {
+        //                buffer.rewind();
+        //                textFromFile += new String(buffer.array());
+        //            }
+        //
+        //        } catch (IOException e) {
+        //            e.printStackTrace();
+        //        }
 
         try (FileChannel channel = (FileChannel) Files.newByteChannel(fileForWritingFromChannel,
-                                                        StandardOpenOption.READ)) {
-            long fileSize = channel.size();
+                                                                      StandardOpenOption.READ)) {
+            long             fileSize     = channel.size();
             MappedByteBuffer mappedBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, fileSize);
 
-            mappedBuffer.flip();
-            System.out.println(mappedBuffer.hasArray());
-            textFromFile += new String(mappedBuffer.array());
+            mappedBuffer.rewind();
+            byte byteBufferArray[] = new byte[(int) fileSize];
+            for (int i = 0; i < fileSize; i++) {
+                byteBufferArray[i] = mappedBuffer.get(i);
+            }
+            textFromFile += new String(byteBufferArray);
         } catch (IOException e) {
             e.printStackTrace();
         }
