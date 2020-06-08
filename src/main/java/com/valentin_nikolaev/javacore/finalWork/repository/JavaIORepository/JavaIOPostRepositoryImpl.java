@@ -3,9 +3,13 @@ package com.valentin_nikolaev.javacore.finalWork.repository.JavaIORepository;
 import com.valentin_nikolaev.javacore.finalWork.models.Post;
 import com.valentin_nikolaev.javacore.finalWork.repository.PostRepository;
 
+import java.nio.file.Path;
 import java.util.List;
 
 public class JavaIOPostRepositoryImpl implements PostRepository {
+
+    public JavaIOPostRepositoryImpl(Path repositoryRootPath) {
+    }
 
     @Override
     public void add(Post post) {

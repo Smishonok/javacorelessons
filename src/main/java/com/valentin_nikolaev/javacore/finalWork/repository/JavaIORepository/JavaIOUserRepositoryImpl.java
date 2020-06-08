@@ -23,12 +23,12 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
 
     public static Logger log = Logger.getLogger(JavaIOUserRepositoryImpl.class);
 
-    private Path             usersRepository;
+    private Path             usersRepositoryPath;
     private PostRepository   postRepository;
     private RegionRepository regionRepository;
 
     public JavaIOUserRepositoryImpl(Path repositoryRootPath) throws ClassNotFoundException {
-        this.usersRepository = repositoryRootPath.resolve("userRepository.txt");
+        this.usersRepositoryPath = repositoryRootPath.resolve("userRepository.txt");
         createUserRepository();
         postRepository   = RepositoryManager.getRepositoryFactory().getPostRepository();
         regionRepository = RepositoryManager.getRepositoryFactory().getRegionRepository();
@@ -36,11 +36,11 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
 
     private void createUserRepository() {
         log.debug("Checking is repository file with users data exists.");
-        if (! Files.exists(this.usersRepository)) {
+        if (! Files.exists(this.usersRepositoryPath)) {
             log.debug(
                     "Users repository does not exist, started the creation of a repository file.");
             try {
-                Files.createFile(this.usersRepository);
+                Files.createFile(this.usersRepositoryPath);
             } catch (IOException e) {
                 log.debug("File \"userRepository.txt\" can`t be created: " + e.getMessage());
             }
@@ -52,7 +52,7 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
 
     @Override
     public void add(User user) {
-        try (BufferedWriter writer = Files.newBufferedWriter(usersRepository,
+        try (BufferedWriter writer = Files.newBufferedWriter(usersRepositoryPath,
                                                              Charset.forName("UTF-8"),
                                                              StandardOpenOption.WRITE,
                                                              StandardOpenOption.APPEND)) {
@@ -66,7 +66,7 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     public User get(Long id) {
         User user = null;
         try {
-            user = Files.lines(usersRepository, Charset.forName("UTF-8")).filter(
+            user = Files.lines(usersRepositoryPath, Charset.forName("UTF-8")).filter(
                     userData->this.parseUserId(userData) == id).map(this::parseUser).collect(
                     Collectors.toList()).get(0);
         } catch (IOException e) {
@@ -85,14 +85,14 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     public void remove(Long id) {
         List<User> users = null;
         try {
-            users = Files.lines(usersRepository, Charset.forName("UTF-8")).filter(
+            users = Files.lines(usersRepositoryPath, Charset.forName("UTF-8")).filter(
                     usersData->this.parseUserId(usersData) != id).map(this::parseUser).collect(
                     Collectors.toList());
         } catch (IOException e) {
             log.error("Can`t read repository file with users data: " + e.getMessage());
         }
 
-        try (BufferedWriter writer = Files.newBufferedWriter(usersRepository,
+        try (BufferedWriter writer = Files.newBufferedWriter(usersRepositoryPath,
                                                              Charset.forName("UTF-8"),
                                                              StandardOpenOption.WRITE)) {
             if (users != null) {
@@ -109,7 +109,8 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     public List<User> getAll() {
         List<User> users = new ArrayList<>();
         try {
-            users = Files.lines(usersRepository).map(this::parseUser).collect(Collectors.toList());
+            users = Files.lines(usersRepositoryPath).map(this::parseUser).collect(
+                    Collectors.toList());
         } catch (IOException e) {
             log.error("Can`t read repository file with users data: " + e.getMessage());
         }
@@ -118,16 +119,16 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
 
     @Override
     public void removeAll() {
-        if (Files.exists(usersRepository)) {
+        if (Files.exists(usersRepositoryPath)) {
             try {
-                Files.delete(usersRepository);
+                Files.delete(usersRepositoryPath);
             } catch (IOException e) {
                 log.error("The repository file can`t be deleted: " + e.getMessage());
             }
         }
 
         try {
-            Files.createFile(usersRepository);
+            Files.createFile(usersRepositoryPath);
         } catch (IOException e) {
             log.error("The repository file can`t be created: " + e.getMessage());
         }
@@ -147,52 +148,64 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
         if (scanner.hasNextLong()) {
             return scanner.nextLong();
         } else {
-            throw new IllegalArgumentException("Input string does not contains user id.");
-        }
-    }
-
-    private User parseUser(String userData) {
-        long       id;
-        String     firstName = "";
-        String     lastName  = "";
-        Region     region;
-        Role       role;
-        List<Post> posts;
-
-        Scanner scanner = new Scanner(userData);
-        scanner.useDelimiter(";");
-
-        scanner.findInLine("User id:");
-        if (scanner.hasNextLong()) {
-            id = scanner.nextLong();
-        } else {
             throw new IllegalArgumentException(
                     "Invalid data. The string does not contain the user Id.");
         }
+    }
+
+    private String parseUserFirstName(String userData) {
+        Scanner scanner = new Scanner(userData);
+        scanner.useDelimiter(";");
 
         scanner.findInLine("User first name:");
-        firstName = scanner.next();
+        return scanner.next();
+    }
+
+    private String parseUserLastName(String userData) {
+        Scanner scanner = new Scanner(userData);
+        scanner.useDelimiter(";");
 
         scanner.findInLine("User last name:");
-        lastName = scanner.next();
+        return scanner.next();
+    }
+
+    private Region parseRegion(String userData) {
+        Scanner scanner = new Scanner(userData);
+        scanner.useDelimiter(";");
 
         scanner.findInLine("User region:");
         if (scanner.hasNextLong()) {
-            region = regionRepository.get(scanner.nextLong());
+            return regionRepository.get(scanner.nextLong());
         } else {
             throw new IllegalArgumentException(
                     "Invalid data. The string does not contain the region Id.");
         }
+    }
+
+    private Role parseRole(String userData) {
+        Scanner scanner = new Scanner(userData);
+        scanner.useDelimiter(";");
 
         scanner.findInLine("User role:");
         if (scanner.hasNext()) {
-            role = Role.valueOf(scanner.next());
+            return Role.valueOf(scanner.next());
         } else {
             throw new IllegalArgumentException(
                     "Invalid data. The string does not contain the user role.");
         }
+    }
 
-        posts = this.postRepository.getPostsByUserId(id);
+    private User parseUser(String userData) {
+        if (userData.isBlank() || userData.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
+        long       id        = parseUserId(userData);
+        String     firstName = parseUserFirstName(userData);
+        String     lastName  = parseUserLastName(userData);
+        Region     region    = parseRegion(userData);
+        Role       role      = parseRole(userData);
+        List<Post> posts     = this.postRepository.getPostsByUserId(id);
 
         return new User(id, firstName, lastName, region, role, posts);
     }

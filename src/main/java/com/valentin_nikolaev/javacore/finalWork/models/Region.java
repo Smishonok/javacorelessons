@@ -1,21 +1,22 @@
 package com.valentin_nikolaev.javacore.finalWork.models;
 
+import java.util.Scanner;
+
 public class Region {
-    private long id;
+    private long   id;
     private String name;
 
     private static long groupId = 0;
 
     public Region(String name) {
-        this.id = ++ groupId;
+        this.id   = ++ groupId;
         this.name = name;
     }
 
     public Region(long id, String name) {
-        this.id = id;
+        this.id   = id;
         this.name = name;
     }
-
 
     public long getId() {
         return id;
@@ -27,6 +28,34 @@ public class Region {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDataForSerialisation() {
+        return "Region id:" + this.getId() + ";" + "Region name:" + this.getName() + ";";
+    }
+
+    public static Region parse(String regionData) {
+        long id;
+        String name;
+
+        Scanner scanner = new Scanner(regionData);
+        scanner.useDelimiter(";");
+
+        scanner.findInLine("Region id:");
+        if (scanner.hasNextLong()) {
+            id = scanner.nextLong();
+        } else {
+            throw new IllegalArgumentException("Can`t parse region id.");
+        }
+
+        scanner.findInLine("Region name:");
+        if (scanner.hasNext()) {
+            name = scanner.next();
+        } else {
+            throw new IllegalArgumentException("Can`t parse region name.");
+        }
+
+        return new Region(id, name);
     }
 
     @Override

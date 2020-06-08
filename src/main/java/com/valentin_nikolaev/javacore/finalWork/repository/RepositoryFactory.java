@@ -2,9 +2,9 @@ package com.valentin_nikolaev.javacore.finalWork.repository;
 
 public interface RepositoryFactory {
 
-    UserRepository getUserRepository();
+    UserRepository getUserRepository() throws ClassNotFoundException;
 
-    PostRepository gerPostRepository();
+    PostRepository getPostRepository();
 
     RegionRepository getRegionRepository();
 

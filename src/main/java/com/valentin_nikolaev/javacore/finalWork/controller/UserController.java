@@ -1,5 +1,7 @@
 package com.valentin_nikolaev.javacore.finalWork.controller;
 
+import com.valentin_nikolaev.javacore.finalWork.models.Region;
+import com.valentin_nikolaev.javacore.finalWork.models.Role;
 import com.valentin_nikolaev.javacore.finalWork.models.User;
 import com.valentin_nikolaev.javacore.finalWork.repository.RepositoryManager;
 import com.valentin_nikolaev.javacore.finalWork.repository.UserRepository;
@@ -7,6 +9,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public class UserController {
 
@@ -14,7 +17,7 @@ public class UserController {
 
     private Map<String, User> usersBuffer;
 
-    private UserRepository   userRepository;
+    private UserRepository   usersRepository;
     private PostController   postController;
     private RegionController regionController;
 
@@ -27,25 +30,27 @@ public class UserController {
 
     private void initUserRepository() throws ClassNotFoundException {
         log.debug("Starting initialisation of User repository");
-        userRepository = RepositoryManager.getRepositoryFactory().getUserRepository();
-        log.debug("User repository implementation is: "+ userRepository.getClass().getName());
+        usersRepository = RepositoryManager.getRepositoryFactory().getUserRepository();
+        log.debug("User repository implementation is: " + usersRepository.getClass().getName());
     }
 
 
-
-    public void addUser(String firstName,String lastName, String role, String region) {
-        User user = new User(firstName, lastName);
-        user.changeUserRole(role);
-
+    public void addUser(String firstName, String lastName, String roleName, String regionName) {
+        Region region = regionController.getRegionByName(regionName);
+        Role   role   = Role.valueOf(roleName);
+        User   user   = new User(firstName, lastName, region, role);
+        this.usersRepository.add(user);
     }
+
 
     public void changeUserData() {
 
     }
 
     public void deleteUser(String userId) {
-
+        this.usersRepository.remove(Long.parseLong(userId));
     }
+
 
 
 
