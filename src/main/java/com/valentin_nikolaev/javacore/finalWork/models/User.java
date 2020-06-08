@@ -2,7 +2,6 @@ package com.valentin_nikolaev.javacore.finalWork.models;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class User {
     private long   id;
@@ -15,18 +14,29 @@ public class User {
     private static long groupId = 0;
     private final  Role DEFAULT = Role.USER;
 
-    {
-        groupId++;
-        this.id = groupId;
-    }
-
-    public User(String firstName, String lastName) {
+    public User(String firstName, String lastName, Region region) {
+        this.id        = ++ groupId;
         this.firstName = firstName;
         this.lastName  = lastName;
+        this.region    = region;
         this.role      = DEFAULT;
         this.posts     = new ArrayList<>();
     }
 
+    public User(String firstName, String lastName, Region region, Role role) {
+        this(firstName, lastName, region);
+        this.role = role;
+    }
+
+    public User(long id, String firstName, String lastName, Region region, Role role,
+                 List<Post> posts) {
+        this.id        = id;
+        this.firstName = firstName;
+        this.lastName  = lastName;
+        this.region    = region;
+        this.role      = role;
+        this.posts     = posts;
+    }
 
     public long getId() {
         return id;
@@ -65,23 +75,7 @@ public class User {
     }
 
     public void changeUserRole(String role) {
-        Objects.requireNonNull(role);
-        switch (role) {
-            case "user":
-                this.role = Role.USER;
-                break;
-            case "admin":
-                this.role = Role.ADMIN;
-                break;
-            case "moderator":
-                this.role = Role.MODERATOR;
-                break;
-            default:
-                String errorMessage =
-                        "\nThe user role can be only: user, admin, moderator. Enter " +
-                                "correct role name.\n";
-                System.out.println(errorMessage);
-        }
+        this.role = Role.valueOf(role);
     }
 
     @Override
