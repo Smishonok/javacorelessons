@@ -56,25 +56,24 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
                                                              Charset.forName("UTF-8"),
                                                              StandardOpenOption.WRITE,
                                                              StandardOpenOption.APPEND)) {
-            writer.write(this.getDataForSerialisation(user));
+            writer.write(this.prepareDataForSerialisation(user));
         } catch (IOException e) {
             log.error("Can`t write the user`s data into repository file: " + e.getMessage());
         }
     }
 
     @Override
-    public User get(Long id) {
-        User user = null;
+    public User get(Long id) throws IllegalArgumentException {
+        Optional<User> user = Optional.empty();
         try {
             user = Files.lines(usersRepositoryPath, Charset.forName("UTF-8")).filter(
-                    userData->this.parseUserId(userData) == id).map(this::parseUser).collect(
-                    Collectors.toList()).get(0);
+                    userData->this.parseUserId(userData) == id).map(this::parseUser).findFirst();
         } catch (IOException e) {
             log.error("Can`t read repository file with users data: " + e.getMessage());
         }
 
-        if (user != null) {
-            return user;
+        if (! user.isEmpty()) {
+            return user.get();
         } else {
             throw new IllegalArgumentException(
                     "User with id '" + id + "' does not contain in database.");
@@ -83,26 +82,29 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
 
     @Override
     public void remove(Long id) {
-        List<User> users = null;
-        try {
-            users = Files.lines(usersRepositoryPath, Charset.forName("UTF-8")).filter(
-                    usersData->this.parseUserId(usersData) != id).map(this::parseUser).collect(
-                    Collectors.toList());
-        } catch (IOException e) {
-            log.error("Can`t read repository file with users data: " + e.getMessage());
-        }
+        List<String> usersList = getUsersListExcludeUserWith(id);
 
         try (BufferedWriter writer = Files.newBufferedWriter(usersRepositoryPath,
                                                              Charset.forName("UTF-8"),
                                                              StandardOpenOption.WRITE)) {
-            if (users != null) {
-                for (User user : users) {
-                    writer.write(this.getDataForSerialisation(user));
-                }
+            for (String userData : usersList) {
+                writer.write(userData);
             }
         } catch (IOException e) {
             log.error("Can`t write in repository file with users data: " + e.getMessage());
         }
+    }
+
+    private List<String> getUsersListExcludeUserWith(Long id) {
+        List<String> usersList = new ArrayList<>();
+        try {
+            usersList = Files.lines(usersRepositoryPath, Charset.forName("UTF-8")).filter(
+                    usersData->this.parseUserId(usersData) != id).collect(
+                    Collectors.toList());
+        } catch (IOException e) {
+            log.error("Can`t read repository file with users data: " + e.getMessage());
+        }
+        return usersList;
     }
 
     @Override
@@ -134,7 +136,19 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
         }
     }
 
-    private String getDataForSerialisation(User user) {
+    @Override
+    public boolean isExists(Long id) {
+        boolean isExist = false;
+        try {
+            isExist = Files.lines(usersRepositoryPath).filter(
+                    userData->this.parseUserId(userData) == id).findFirst().isEmpty();
+        } catch (IOException e) {
+            log.error("Users`s repository file can`t be opened and read: " + e.getMessage());
+        }
+        return isExist;
+    }
+
+    private String prepareDataForSerialisation(User user) {
         return "User id:" + user.getId() + ";" + "User first name:" + user.getFirstName() + ";" +
                 "User last name:" + user.getLastName() + ";" + "User region Id:" +
                 user.getRegion().getId() + ";" + "User role:" + user.getRole().toString() + ";";

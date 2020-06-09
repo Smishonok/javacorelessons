@@ -14,4 +14,6 @@ public interface GenericRepository<T,ID> {
 
     void removeAll();
 
+    boolean isExists(ID id);
+
 }

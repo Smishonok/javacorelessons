@@ -1,17 +1,22 @@
 package com.valentin_nikolaev.javacore.finalWork.repository.JavaIORepository;
 
 import com.valentin_nikolaev.javacore.finalWork.models.Region;
+import com.valentin_nikolaev.javacore.finalWork.models.User;
 import com.valentin_nikolaev.javacore.finalWork.repository.RegionRepository;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class JavaIORegionRepositoryImpl implements RegionRepository {
 
@@ -47,7 +52,7 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
                                                             Charset.forName("UTF-8"),
                                                             StandardOpenOption.WRITE,
                                                             StandardOpenOption.APPEND);
-            writer.write(this.getDataForSerialisation(region));
+            writer.write(this.prepareDataForSerialisation(region));
         } catch (IOException e) {
             log.error("Can`t write the region`s data into repository file: " + e.getMessage());
         }
@@ -56,26 +61,93 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
 
     @Override
     public Region get(Long id) {
+        Optional<Region> region = Optional.empty();
 
+        try {
+            region = Files.lines(regionRepositoryPath).filter(
+                    regionData->this.parseRegionId(regionData) == id).map(this::parseRegion)
+                          .findFirst();
+        } catch (IOException e) {
+            log.error("Users`s repository file can`t be opened and read: " + e.getMessage());
+        }
 
+        if (! region.isEmpty()) {
+            return region.get();
+        } else {
+            throw new IllegalArgumentException(
+                    "Region with id " + id + "' does not contain in " + "database.");
+        }
     }
 
     @Override
     public void remove(Long id) {
+        List<String> regionsList = getRegionsListExcludeRegionWith(id);
 
+        try (BufferedWriter writer = Files.newBufferedWriter(regionRepositoryPath,
+                                                             Charset.forName("UTF-8"),
+                                                             StandardOpenOption.WRITE)) {
+            for (String region : regionsList) {
+                writer.write(region);
+            }
+        } catch (IOException e) {
+            log.error("Can`t write in repository file with regions data: " + e.getMessage());
+        }
+    }
+
+    private List<String> getRegionsListExcludeRegionWith(Long id) {
+        List<String> regionsList = new ArrayList<>();
+        try {
+            regionsList = Files.lines(regionRepositoryPath).filter(
+                    regionData->this.parseRegionId(regionData) != id).collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Can`t read repository file with regions data: " + e.getMessage());
+        }
+        return regionsList;
     }
 
     @Override
     public List<Region> getAll() {
-
+        List<Region> regions = new ArrayList<>();
+        try {
+            regions = Files.lines(regionRepositoryPath).map(this::parseRegion).collect(
+                    Collectors.toList());
+        } catch (IOException e) {
+            log.error("Can`t read repository file with regions data: " + e.getMessage());
+        }
+        return regions;
     }
 
     @Override
     public void removeAll() {
+        if (Files.exists(regionRepositoryPath)) {
+            try {
+                Files.delete(regionRepositoryPath);
+            } catch (IOException e) {
+                log.error("The repository file can`t be deleted: " + e.getMessage());
+            }
+        }
 
+        try {
+            Files.createFile(regionRepositoryPath);
+        } catch (IOException e) {
+            log.error("The repository file can`t be created: " + e.getMessage());
+        }
     }
 
-    private String getDataForSerialisation(Region region) {
+    @Override
+    public boolean isExists(Long id) {
+        boolean isExists = false;
+
+        try {
+            isExists = Files.lines(regionRepositoryPath).filter(
+                    regionData->this.parseRegionId(regionData) == id).findFirst().isEmpty();
+        } catch (IOException e) {
+            log.error("Can`t read repository file with region data: "+e.getMessage());
+        }
+        return isExists;
+    }
+
+    private String prepareDataForSerialisation(Region region) {
         return "Region id:" + region.getId() + ";" + "Region name:" + region.getName() + ";";
     }
 
@@ -110,8 +182,8 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
             throw new IllegalArgumentException();
         }
 
-        long       id = parseRegionId(regionData);
-        String     name = parseRegionName(regionData);
+        long   id   = parseRegionId(regionData);
+        String name = parseRegionName(regionData);
 
         return new Region(id, name);
     }
