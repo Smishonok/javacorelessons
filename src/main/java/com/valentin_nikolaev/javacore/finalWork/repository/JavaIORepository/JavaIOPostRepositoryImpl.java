@@ -24,13 +24,19 @@ public class JavaIOPostRepositoryImpl implements PostRepository {
 
     private Path postsRepositoryPath;
 
+    //Post`s fields names for parsing
+    private final String POST_ID       = "Post`s id:";
+    private final String USER_ID       = "User`s id:";
+    private final String CREATION_DATE = "Post`s creation date:";
+    private final String UPDATING_DATE = "Post`s updating date:";
+    private final String POST_CONTENT  = "Post`s content:";
 
     public JavaIOPostRepositoryImpl(Path repositoryRootPath) {
         postsRepositoryPath = repositoryRootPath.resolve("postsRepository.txt");
-        createPostRepository();
+        createPostsRepository();
     }
 
-    private void createPostRepository() {
+    private void createPostsRepository() {
         log.debug("Checking is repository file with posts data exists.");
         if (! Files.exists(this.postsRepositoryPath)) {
             log.debug(
@@ -59,10 +65,10 @@ public class JavaIOPostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public Post get(Long id) {
+    public Post get(Long postId) {
         Optional<Post> post = Optional.empty();
         try {
-            post = Files.lines(postsRepositoryPath).filter(postData->parsePostId(postData) == id)
+            post = Files.lines(postsRepositoryPath).filter(postData->parsePostId(postData) == postId)
                         .map(this::parsePost).findFirst();
         } catch (IOException e) {
             log.error("Can`t read repository file with posts data: " + e.getMessage());
@@ -72,35 +78,36 @@ public class JavaIOPostRepositoryImpl implements PostRepository {
             return post.get();
         } else {
             throw new IllegalArgumentException(
-                    "Post with id: " + id + " does not contain in repository.");
+                    "Post with id: " + postId + " does not contain in repository.");
         }
     }
 
     @Override
-    public void remove(Long id) {
-        List<String> postsList = getPostsListExcludePostWithId(id);
+    public void change(Post post) {
+        List<Post> postsList = getAll();
 
-        try {
-            BufferedWriter writer = Files.newBufferedWriter(postsRepositoryPath,
-                                                            Charset.forName("UTF-8"),
-                                                            StandardOpenOption.WRITE);
-            for (String post : postsList) {
-                writer.write(post);
+        int indexOfPostInPostList = - 1;
+        for (int i = 0; i < postsList.size(); i++) {
+            if (postsList.get(i).getId() == post.getId()) {
+                indexOfPostInPostList = i;
             }
-        } catch (IOException e) {
-            log.error("Can`t write the post`s data into repository file: " + e.getMessage());
         }
+
+        if (indexOfPostInPostList == - 1) {
+            throw new IllegalArgumentException(
+                    "Post with ID: " + post.getId() + " is not contains in repository.");
+        }
+
+        postsList.set(indexOfPostInPostList, post);
+
+        rewriteInRepository(postsList.stream().map(this::prepareDataForSerialisation).collect(
+                Collectors.toList()));
     }
 
-    private List<String> getPostsListExcludePostWithId(long id) {
-        List<String> postsList = new ArrayList<>();
-        try {
-            postsList = Files.lines(postsRepositoryPath).filter(
-                    postData->parsePostId(postData) != id).collect(Collectors.toList());
-        } catch (IOException e) {
-            log.error("Can`t read repository file with posts data: " + e.getMessage());
-        }
-        return postsList;
+    @Override
+    public void remove(Long postId) {
+        List<String> postsList = getPostsListExcludePostWithId(postId);
+        rewriteInRepository(postsList);
     }
 
     @Override
@@ -142,28 +149,7 @@ public class JavaIOPostRepositoryImpl implements PostRepository {
     @Override
     public void removePostsByUserId(Long userId) {
         List<String> postsList = getPostsListWithOutCreatedByUser(userId);
-
-        try {
-            BufferedWriter writer = Files.newBufferedWriter(postsRepositoryPath,
-                                                            Charset.forName("UTF-8"),
-                                                            StandardOpenOption.WRITE);
-            for (String post : postsList) {
-                writer.write(post);
-            }
-        } catch (IOException e) {
-            log.error("Can`t write the post`s data into repository file: " + e.getMessage());
-        }
-    }
-
-    private List<String> getPostsListWithOutCreatedByUser(long userId) {
-        List<String> postsList = new ArrayList<>();
-        try {
-            postsList = Files.lines(postsRepositoryPath).filter(
-                    postData->parseUserId(postData) != userId).collect(Collectors.toList());
-        } catch (IOException e) {
-            log.error("Can`t read repository file with posts data: " + e.getMessage());
-        }
-        return postsList;
+        rewriteInRepository(postsList);
     }
 
     @Override
@@ -178,6 +164,41 @@ public class JavaIOPostRepositoryImpl implements PostRepository {
         return isExists;
     }
 
+    private void rewriteInRepository(List<String> postsList) {
+        try {
+            BufferedWriter writer = Files.newBufferedWriter(postsRepositoryPath,
+                                                            Charset.forName("UTF-8"),
+                                                            StandardOpenOption.WRITE);
+            for (String post : postsList) {
+                writer.write(post);
+            }
+        } catch (IOException e) {
+            log.error("Can`t write the post`s data into repository file: " + e.getMessage());
+        }
+    }
+
+    private List<String> getPostsListExcludePostWithId(long id) {
+        List<String> postsList = new ArrayList<>();
+        try {
+            postsList = Files.lines(postsRepositoryPath).filter(
+                    postData->parsePostId(postData) != id).collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Can`t read repository file with posts data: " + e.getMessage());
+        }
+        return postsList;
+    }
+
+    private List<String> getPostsListWithOutCreatedByUser(long userId) {
+        List<String> postsList = new ArrayList<>();
+        try {
+            postsList = Files.lines(postsRepositoryPath).filter(
+                    postData->parseUserId(postData) != userId).collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Can`t read repository file with posts data: " + e.getMessage());
+        }
+        return postsList;
+    }
+
     private String prepareDataForSerialisation(Post post) {
         long   postId  = post.getId();
         long   userId  = post.getUserId();
@@ -189,16 +210,16 @@ public class JavaIOPostRepositoryImpl implements PostRepository {
                 ZoneOffset.UTC);
 
 
-        return "Post`s id:" + postId + ";" + "User`s id:" + userId + ";" + "Post`s creation date:" +
-                creationTimeInEpochSeconds + ";" + "Post`s updating date:" +
-                updatingTimeInEpochSeconds + ";" + "Post`s content:" + content + ";\n";
+        return POST_ID + postId + ";" + USER_ID + userId + ";" + CREATION_DATE +
+                creationTimeInEpochSeconds + ";" + UPDATING_DATE + updatingTimeInEpochSeconds +
+                ";" + POST_CONTENT + content + ";\n";
     }
 
     private long parsePostId(String postData) {
         Scanner scanner = new Scanner(postData);
         scanner.useDelimiter(";");
 
-        scanner.findInLine("Post`s id:");
+        scanner.findInLine(POST_ID);
         if (scanner.hasNextLong()) {
             return scanner.nextLong();
         } else {
@@ -211,7 +232,7 @@ public class JavaIOPostRepositoryImpl implements PostRepository {
         Scanner scanner = new Scanner(postData);
         scanner.useDelimiter(";");
 
-        scanner.findInLine("User`s id:");
+        scanner.findInLine(USER_ID);
         if (scanner.hasNextLong()) {
             return scanner.nextLong();
         } else {
@@ -239,17 +260,22 @@ public class JavaIOPostRepositoryImpl implements PostRepository {
         Scanner scanner = new Scanner(postData);
         scanner.useDelimiter(";");
 
-        scanner.findInLine("Post`s content:");
+        scanner.findInLine(POST_CONTENT);
         String content = "";
         content += scanner.next();
         return content;
     }
 
     private Post parsePost(String postData) {
+        if (postData.isBlank() || postData.isEmpty()) {
+            throw new IllegalArgumentException("String with post`s data for parsing can`t be " +
+                                                       "empty");
+        }
+
         long          postId       = parsePostId(postData);
         long          userId       = parseUserId(postData);
-        LocalDateTime creationDate = parseDateTime("Post`s creation date:", postData);
-        LocalDateTime updatingDate = parseDateTime("Post`s updating date:", postData);
+        LocalDateTime creationDate = parseDateTime(CREATION_DATE, postData);
+        LocalDateTime updatingDate = parseDateTime(UPDATING_DATE, postData);
         String        content      = parseContent(postData);
 
         return new Post(postId, userId, content, creationDate, updatingDate);

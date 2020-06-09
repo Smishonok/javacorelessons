@@ -27,6 +27,13 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     private PostRepository   postRepository;
     private RegionRepository regionRepository;
 
+    //User`s fields names for parsing
+    private final String USER_ID         = "User`s id:";
+    private final String USER_FIRST_NAME = "User`s first name:";
+    private final String USER_LAST_NAME  = "User`s last name:";
+    private final String REGION_ID       = "User`s region Id:";
+    private final String USERS_ROLE      = "User`s role:";
+
     public JavaIOUserRepositoryImpl(Path repositoryRootPath) throws ClassNotFoundException {
         this.usersRepositoryPath = repositoryRootPath.resolve("userRepository.txt");
         createUserRepository();
@@ -81,9 +88,28 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void remove(Long id) {
-        List<String> usersList = getUsersListExcludeUserWith(id);
+    public void change(User user) {
+        List<User> usersList = getAll();
 
+        int indexOfUserInList = - 1;
+        for (int i = 0; i < usersList.size(); i++) {
+            if (usersList.get(i).getId() == user.getId()) {
+                indexOfUserInList = i;
+            }
+        }
+
+        if (indexOfUserInList == - 1) {
+            throw new IllegalArgumentException(
+                    "User with ID: " + user.getId() + " is not contains in repository.");
+        }
+
+        usersList.set(indexOfUserInList, user);
+
+        rewriteInRepository(usersList.stream().map(this::prepareDataForSerialisation)
+                                     .collect(Collectors.toList()));
+    }
+
+    private void rewriteInRepository(List<String> usersList) {
         try (BufferedWriter writer = Files.newBufferedWriter(usersRepositoryPath,
                                                              Charset.forName("UTF-8"),
                                                              StandardOpenOption.WRITE)) {
@@ -93,6 +119,12 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
         } catch (IOException e) {
             log.error("Can`t write in repository file with users data: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void remove(Long id) {
+        List<String> usersList = getUsersListExcludeUserWith(id);
+        rewriteInRepository(usersList);
     }
 
     private List<String> getUsersListExcludeUserWith(long id) {
@@ -142,17 +174,15 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     }
 
     private String prepareDataForSerialisation(User user) {
-        return "User`s id:" + user.getId() + ";" + "User`s first name:" + user.getFirstName() +
-                ";" +
-                "User`s last name:" + user.getLastName() + ";" + "User`s region Id:" +
-                user.getRegion().getId() + ";" + "User`s role:" + user.getRole().toString() + ";\n";
+        return USER_ID + user.getId() + ";" + USER_FIRST_NAME + user.getFirstName() + ";" +
+                USER_LAST_NAME + user.getLastName() + ";" + REGION_ID + user.getRegion().getId() +
+                ";" + USERS_ROLE + user.getRole().toString() + ";\n";
     }
 
     private long parseUserId(String userData) {
-        Scanner scanner = new Scanner(userData);
-        scanner.useDelimiter(";");
+        Scanner scanner = getScanner(userData);
 
-        scanner.findInLine("User`s id:");
+        scanner.findInLine(USER_ID);
         if (scanner.hasNextLong()) {
             return scanner.nextLong();
         } else {
@@ -162,26 +192,23 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     }
 
     private String parseUserFirstName(String userData) {
-        Scanner scanner = new Scanner(userData);
-        scanner.useDelimiter(";");
+        Scanner scanner = getScanner(userData);
 
-        scanner.findInLine("User`s first name:");
+        scanner.findInLine(USER_FIRST_NAME);
         return scanner.next();
     }
 
     private String parseUserLastName(String userData) {
-        Scanner scanner = new Scanner(userData);
-        scanner.useDelimiter(";");
+        Scanner scanner = getScanner(userData);
 
-        scanner.findInLine("User`s last name:");
+        scanner.findInLine(USER_LAST_NAME);
         return scanner.next();
     }
 
     private Region parseRegion(String userData) {
-        Scanner scanner = new Scanner(userData);
-        scanner.useDelimiter(";");
+        Scanner scanner = getScanner(userData);
 
-        scanner.findInLine("User`s region:");
+        scanner.findInLine(REGION_ID);
         if (scanner.hasNextLong()) {
             return regionRepository.get(scanner.nextLong());
         } else {
@@ -191,10 +218,9 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     }
 
     private Role parseRole(String userData) {
-        Scanner scanner = new Scanner(userData);
-        scanner.useDelimiter(";");
+        Scanner scanner = getScanner(userData);
 
-        scanner.findInLine("User`s role:");
+        scanner.findInLine(USERS_ROLE);
         if (scanner.hasNext()) {
             return Role.valueOf(scanner.next());
         } else {
@@ -205,7 +231,9 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
 
     private User parseUser(String userData) {
         if (userData.isBlank() || userData.isEmpty()) {
-            throw new IllegalArgumentException();
+            log.error("String with users`s data for parsing can`t be empty");
+            throw new IllegalArgumentException(
+                    "String with users`s data for parsing can`t be " + "empty");
         }
 
         long       id        = parseUserId(userData);
@@ -218,5 +246,9 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
         return new User(id, firstName, lastName, region, role, posts);
     }
 
-
+    private Scanner getScanner(String source) {
+        Scanner scanner = new Scanner(source);
+        scanner.useDelimiter(";");
+        return scanner;
+    }
 }

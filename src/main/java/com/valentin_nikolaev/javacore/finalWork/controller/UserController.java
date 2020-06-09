@@ -9,13 +9,10 @@ import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class UserController {
 
     static Logger log = Logger.getLogger(UserController.class.getName());
-
-    private Map<String, User> usersBuffer;
 
     private UserRepository   usersRepository;
     private PostController   postController;
@@ -25,7 +22,6 @@ public class UserController {
         this.postController   = new PostController();
         this.regionController = new RegionController();
         initUserRepository();
-        this.usersBuffer = new HashMap<>();
     }
 
     private void initUserRepository() throws ClassNotFoundException {

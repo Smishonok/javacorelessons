@@ -22,6 +22,10 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
 
     private Path regionRepositoryPath;
 
+    //Region`s fields names for parsing
+    private final String REGION_ID   = "Post`s id:";
+    private final String REGION_NAME = "User`s id:";
+
     public JavaIORegionRepositoryImpl(Path repositoryRootPath) {
         this.regionRepositoryPath = repositoryRootPath.resolve("regionRepository.txt");
         createRegionRepository();
@@ -58,12 +62,12 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
     }
 
     @Override
-    public Region get(Long id) {
+    public Region get(Long regionId) {
         Optional<Region> region = Optional.empty();
 
         try {
             region = Files.lines(regionRepositoryPath).filter(
-                    regionData->this.parseRegionId(regionData) == id).map(this::parseRegion)
+                    regionData->this.parseRegionId(regionData) == regionId).map(this::parseRegion)
                           .findFirst();
         } catch (IOException e) {
             log.error("Users`s repository file can`t be opened and read: " + e.getMessage());
@@ -73,34 +77,36 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
             return region.get();
         } else {
             throw new IllegalArgumentException(
-                    "Region with id " + id + "' does not contain in " + "database.");
+                    "Region with id " + regionId + "' does not contain in " + "database.");
         }
     }
 
     @Override
-    public void remove(Long id) {
-        List<String> regionsList = getRegionsListExcludeRegionWith(id);
+    public void change(Region region) {
+        List<Region> regionsList = getAll();
 
-        try (BufferedWriter writer = Files.newBufferedWriter(regionRepositoryPath,
-                                                             Charset.forName("UTF-8"),
-                                                             StandardOpenOption.WRITE)) {
-            for (String region : regionsList) {
-                writer.write(region);
+        int indexOfRegionInRegionsList = - 1;
+        for (int i = 0; i < regionsList.size(); i++) {
+            if (regionsList.get(i).getId() == region.getId()) {
+                indexOfRegionInRegionsList = i;
             }
-        } catch (IOException e) {
-            log.error("Can`t write in repository file with regions data: " + e.getMessage());
         }
+
+        if (indexOfRegionInRegionsList == - 1) {
+            throw new IllegalArgumentException(
+                    "Region with ID: " + region.getId() + " is not contains in repository.");
+        }
+
+        regionsList.set(indexOfRegionInRegionsList, region);
+
+        rewriteInRepository(regionsList.stream().map(this::prepareDataForSerialisation)
+                                       .collect(Collectors.toList()));
     }
 
-    private List<String> getRegionsListExcludeRegionWith(long id) {
-        List<String> regionsList = new ArrayList<>();
-        try {
-            regionsList = Files.lines(regionRepositoryPath).filter(
-                    regionData->this.parseRegionId(regionData) != id).collect(Collectors.toList());
-        } catch (IOException e) {
-            log.error("Can`t read repository file with regions data: " + e.getMessage());
-        }
-        return regionsList;
+    @Override
+    public void remove(Long regionId) {
+        List<String> regionsList = getRegionsListExcludeRegionWith(regionId);
+        rewriteInRepository(regionsList);
     }
 
     @Override
@@ -127,27 +133,49 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
     }
 
     @Override
-    public boolean isExists(Long id) {
+    public boolean isExists(Long regionId) {
         boolean isExists = false;
 
         try {
             isExists = Files.lines(regionRepositoryPath).filter(
-                    regionData->this.parseRegionId(regionData) == id).findFirst().isEmpty();
+                    regionData->this.parseRegionId(regionData) == regionId).findFirst().isEmpty();
         } catch (IOException e) {
             log.error("Can`t read repository file with region data: " + e.getMessage());
         }
         return isExists;
     }
 
+    private List<String> getRegionsListExcludeRegionWith(long regionId) {
+        List<String> regionsList = new ArrayList<>();
+        try {
+            regionsList = Files.lines(regionRepositoryPath).filter(
+                    regionData->this.parseRegionId(regionData) != regionId).collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Can`t read repository file with regions data: " + e.getMessage());
+        }
+        return regionsList;
+    }
+
+    private void rewriteInRepository(List<String> regionsList) {
+        try (BufferedWriter writer = Files.newBufferedWriter(regionRepositoryPath,
+                                                             Charset.forName("UTF-8"),
+                                                             StandardOpenOption.WRITE)) {
+            for (String region : regionsList) {
+                writer.write(region);
+            }
+        } catch (IOException e) {
+            log.error("Can`t write in repository file with regions data: " + e.getMessage());
+        }
+    }
+
     private String prepareDataForSerialisation(Region region) {
-        return "Region`s id:" + region.getId() + ";" + "Region`s name:" + region.getName() + ";\n";
+        return REGION_ID + region.getId() + ";" + REGION_NAME + region.getName() + ";\n";
     }
 
     private long parseRegionId(String regionData) {
-        Scanner scanner = new Scanner(regionData);
-        scanner.useDelimiter(";");
+        Scanner scanner = getScanner(regionData);
 
-        scanner.findInLine("Region`s id:");
+        scanner.findInLine(REGION_ID);
         if (scanner.hasNextLong()) {
             return scanner.nextLong();
         } else {
@@ -157,10 +185,9 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
     }
 
     private String parseRegionName(String regionData) {
-        Scanner scanner = new Scanner(regionData);
-        scanner.useDelimiter(";");
+        Scanner scanner = getScanner(regionData);
 
-        scanner.findInLine("Region`s name:");
+        scanner.findInLine(REGION_NAME);
         if (scanner.hasNext()) {
             return scanner.next();
         } else {
@@ -171,7 +198,8 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
 
     private Region parseRegion(String regionData) {
         if (regionData.isBlank() || regionData.isEmpty()) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                    "String with region`s data for parsing can`t be " + "empty");
         }
 
         long   id   = parseRegionId(regionData);
@@ -180,4 +208,9 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
         return new Region(id, name);
     }
 
+    private Scanner getScanner(String recourse) {
+        Scanner scanner = new Scanner(recourse);
+        scanner.useDelimiter(";");
+        return scanner;
+    }
 }

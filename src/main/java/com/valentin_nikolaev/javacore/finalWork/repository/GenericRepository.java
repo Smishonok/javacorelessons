@@ -8,6 +8,8 @@ public interface GenericRepository<T,ID> {
 
     T get(ID id);
 
+    void change(T entity);
+
     void remove(ID id);
 
     List<T> getAll();
