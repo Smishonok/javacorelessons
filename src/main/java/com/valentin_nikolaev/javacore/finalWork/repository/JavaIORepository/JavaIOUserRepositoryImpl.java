@@ -95,12 +95,11 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
         }
     }
 
-    private List<String> getUsersListExcludeUserWith(Long id) {
+    private List<String> getUsersListExcludeUserWith(long id) {
         List<String> usersList = new ArrayList<>();
         try {
             usersList = Files.lines(usersRepositoryPath, Charset.forName("UTF-8")).filter(
-                    usersData->this.parseUserId(usersData) != id).collect(
-                    Collectors.toList());
+                    usersData->this.parseUserId(usersData) != id).collect(Collectors.toList());
         } catch (IOException e) {
             log.error("Can`t read repository file with users data: " + e.getMessage());
         }
@@ -109,14 +108,8 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> getAll() {
-        List<User> users = new ArrayList<>();
-        try {
-            users = Files.lines(usersRepositoryPath).map(this::parseUser).collect(
-                    Collectors.toList());
-        } catch (IOException e) {
-            log.error("Can`t read repository file with users data: " + e.getMessage());
-        }
-        return users;
+        return getUsersListExcludeUserWith(0).stream().map(this::parseUser).collect(
+                Collectors.toList());
     }
 
     @Override
@@ -149,16 +142,17 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     }
 
     private String prepareDataForSerialisation(User user) {
-        return "User id:" + user.getId() + ";" + "User first name:" + user.getFirstName() + ";" +
-                "User last name:" + user.getLastName() + ";" + "User region Id:" +
-                user.getRegion().getId() + ";" + "User role:" + user.getRole().toString() + ";";
+        return "User`s id:" + user.getId() + ";" + "User`s first name:" + user.getFirstName() +
+                ";" +
+                "User`s last name:" + user.getLastName() + ";" + "User`s region Id:" +
+                user.getRegion().getId() + ";" + "User`s role:" + user.getRole().toString() + ";\n";
     }
 
     private long parseUserId(String userData) {
         Scanner scanner = new Scanner(userData);
         scanner.useDelimiter(";");
 
-        scanner.findInLine("User id:");
+        scanner.findInLine("User`s id:");
         if (scanner.hasNextLong()) {
             return scanner.nextLong();
         } else {
@@ -171,7 +165,7 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
         Scanner scanner = new Scanner(userData);
         scanner.useDelimiter(";");
 
-        scanner.findInLine("User first name:");
+        scanner.findInLine("User`s first name:");
         return scanner.next();
     }
 
@@ -179,7 +173,7 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
         Scanner scanner = new Scanner(userData);
         scanner.useDelimiter(";");
 
-        scanner.findInLine("User last name:");
+        scanner.findInLine("User`s last name:");
         return scanner.next();
     }
 
@@ -187,7 +181,7 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
         Scanner scanner = new Scanner(userData);
         scanner.useDelimiter(";");
 
-        scanner.findInLine("User region:");
+        scanner.findInLine("User`s region:");
         if (scanner.hasNextLong()) {
             return regionRepository.get(scanner.nextLong());
         } else {
@@ -200,7 +194,7 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
         Scanner scanner = new Scanner(userData);
         scanner.useDelimiter(";");
 
-        scanner.findInLine("User role:");
+        scanner.findInLine("User`s role:");
         if (scanner.hasNext()) {
             return Role.valueOf(scanner.next());
         } else {
