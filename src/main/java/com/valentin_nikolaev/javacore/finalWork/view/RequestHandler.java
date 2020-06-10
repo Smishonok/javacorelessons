@@ -1,10 +1,14 @@
 package com.valentin_nikolaev.javacore.finalWork.view;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 public abstract class RequestHandler {
 
     private RequestHandler nextRequestHandler;
 
-    public abstract void handleRequest(String action, String[] options)
+    public abstract void handleRequest(String action, List<String> options)
             throws ClassNotFoundException;
 
     public RequestHandler setNextHandler(RequestHandler handler) {
@@ -20,14 +24,24 @@ public abstract class RequestHandler {
         return hasNext;
     }
 
-    public void getNextHandler(String action,String[] options) throws ClassNotFoundException {
+    public void getNextHandler(String action, List<String> options) throws ClassNotFoundException {
         if (hasNextHandler()) {
-            nextRequestHandler.handleRequest(action,options);
+            nextRequestHandler.handleRequest(action, options);
         } else {
             getHelp();
         }
     }
 
     public abstract void getHelp();
+
+    public List<String> getOptionsWithOutFirst(List<String> options) {
+        List<String> optionsListWithOutFirst = new ArrayList<>();
+        if (options.size() > 1) {
+            for (int i = 1; i < options.size(); i++) {
+                optionsListWithOutFirst.add(options.get(i));
+            }
+        }
+        return optionsListWithOutFirst;
+    }
 
 }

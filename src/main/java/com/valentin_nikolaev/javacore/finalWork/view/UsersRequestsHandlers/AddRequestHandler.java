@@ -9,7 +9,7 @@ import java.util.List;
 public class AddRequestHandler extends UserRequestHandler {
 
     @Override
-    public void handleRequest(String action, String[] options) throws ClassNotFoundException {
+    public void handleRequest(String action, List<String> options) throws ClassNotFoundException {
         if (ADD.equals(action)) {
             addUser(options);
         } else {
@@ -17,10 +17,10 @@ public class AddRequestHandler extends UserRequestHandler {
         }
     }
 
-    private void addUser(String[] options) throws ClassNotFoundException {
-        int userDataLength = options.length;
+    private void addUser(List<String> options) throws ClassNotFoundException {
+        int userDataLength = options.size();
 
-        if (options.length == 1 && options[0].equals(HELP)) {
+        if (options.size() == 1 && options.get(0).equals(HELP)) {
             userDataLength = - 1;
         }
 
@@ -42,10 +42,10 @@ public class AddRequestHandler extends UserRequestHandler {
         }
     }
 
-    private void addUserShort(String[] options) throws ClassNotFoundException {
-        String userFirstName = options[0];
-        String userLastName  = options[1];
-        String regionName    = options[2];
+    private void addUserShort(List<String> options) throws ClassNotFoundException {
+        String userFirstName = options.get(0);
+        String userLastName  = options.get(1);
+        String regionName    = options.get(2);
 
         if (isRegionNameValid(regionName)) {
             UserController userController = new UserController();
@@ -57,11 +57,11 @@ public class AddRequestHandler extends UserRequestHandler {
         }
     }
 
-    private void addUserLong(String[] options)throws ClassNotFoundException {
-        String userFirstName = options[0];
-        String userLastName  = options[1];
-        String userRole      = options[2];
-        String regionName    = options[3];
+    private void addUserLong(List<String> options)throws ClassNotFoundException {
+        String userFirstName = options.get(0);
+        String userLastName  = options.get(1);
+        String userRole      = options.get(2);
+        String regionName    = options.get(3);
 
         if (! isRegionNameValid(regionName)) {
             System.out.println(
@@ -91,15 +91,5 @@ public class AddRequestHandler extends UserRequestHandler {
                 "\t Variant 1: Ivan Ivanov Moscow\n" +
                 "\t Variant 2: Ivan Ivanov admin Moscow\n";
         System.out.println(helpInfo);
-    }
-
-    private boolean isRegionNameValid(String regionName) throws ClassNotFoundException {
-        RegionController regionController = new RegionController();
-        return regionController.getRegionByName(regionName).isPresent();
-    }
-
-    private boolean isRoleNameValid(String roleName) {
-        List<Role> roles = List.of(Role.values());
-        return roles.stream().anyMatch(role->role.toString().equals(roleName));
     }
 }

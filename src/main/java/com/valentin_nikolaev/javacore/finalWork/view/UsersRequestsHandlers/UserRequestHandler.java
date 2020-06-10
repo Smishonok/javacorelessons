@@ -14,7 +14,6 @@ public abstract class UserRequestHandler extends RequestHandler {
     protected final String REMOVE = "remove";
     protected final String HELP   = "help";
 
-
     @Override
     public void getHelp() {
         String helpInfo = "Invalid request type, please check request type and try again.\n" +
@@ -29,5 +28,22 @@ public abstract class UserRequestHandler extends RequestHandler {
         System.out.println(helpInfo);
     }
 
+    protected boolean isRegionNameValid(String regionName) throws ClassNotFoundException {
+        RegionController regionController = new RegionController();
+        return regionController.getRegionByName(regionName).isPresent();
+    }
 
+    protected boolean isRoleNameValid(String roleName) {
+        List<Role> roles = List.of(Role.values());
+        return roles.stream().anyMatch(role->role.toString().equals(roleName));
+    }
+
+    protected boolean isLong(String string) {
+        try {
+            Long.parseLong(string);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }
