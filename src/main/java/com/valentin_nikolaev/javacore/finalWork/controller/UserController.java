@@ -8,7 +8,10 @@ import com.valentin_nikolaev.javacore.finalWork.repository.UserRepository;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class UserController {
 
@@ -30,6 +33,11 @@ public class UserController {
         log.debug("User repository implementation is: " + usersRepository.getClass().getName());
     }
 
+    public void addUser(String firstName, String lastName, String regionName) {
+        Region region = regionController.getRegionByName(regionName);
+        User   user   = new User(firstName, lastName, region);
+        this.usersRepository.add(user);
+    }
 
     public void addUser(String firstName, String lastName, String roleName, String regionName) {
         Region region = regionController.getRegionByName(regionName);
@@ -38,13 +46,82 @@ public class UserController {
         this.usersRepository.add(user);
     }
 
-
-    public void changeUserData() {
-
+    public Optional<User> getUserById(String id) {
+        long           userId = Long.parseLong(id);
+        Optional<User> user   = Optional.empty();
+        if (this.usersRepository.contains(userId)) {
+            user = Optional.of(this.usersRepository.get(userId));
+        }
+        return user;
     }
 
-    public void deleteUser(String userId) {
+    public List<User> getAllUsersList() {
+        return this.usersRepository.getAll();
+    }
+
+    public List<User> getUsersWithFirstName(String firstName) {
+        return this.usersRepository.getAll().stream().filter(
+                user->user.getFirstName().equals(firstName)).collect(Collectors.toList());
+    }
+
+    public List<User> getUsersWithLastName(String lastName) {
+        return this.usersRepository.getAll().stream().filter(
+                user->user.getLastName().equals(lastName)).collect(Collectors.toList());
+    }
+
+    public List<User> getUsersWithRole(String roleName) {
+        return this.usersRepository.getAll().stream().filter(
+                user->user.getRole().toString().equals(roleName)).collect(Collectors.toList());
+    }
+
+    public List<User> getUsersFrom(String regionName) {
+        return this.usersRepository.getAll().stream().filter(
+                user->user.getRegion().getName().equals(regionName)).collect(Collectors.toList());
+    }
+
+    public void changeUserFirstName(String userId, String newUserFirstName) {
+        long id = Long.parseLong(userId);
+        if (this.usersRepository.contains(id)) {
+            User user = this.usersRepository.get(id);
+            user.setFirstName(newUserFirstName);
+            this.usersRepository.change(user);
+        }
+    }
+
+    public void changeUserLastName(String userId, String newUserLastName) {
+        long id = Long.parseLong(userId);
+        if (this.usersRepository.contains(id)) {
+            User user = this.usersRepository.get(id);
+            user.setLastName(newUserLastName);
+            this.usersRepository.change(user);
+        }
+    }
+
+    public void changeUserRole(String userId, String newUserRole) {
+        long id = Long.parseLong(userId);
+        if (this.usersRepository.contains(id)) {
+            User user = this.usersRepository.get(id);
+            user.changeUserRole(newUserRole);
+            this.usersRepository.change(user);
+        }
+    }
+
+    public void changeUserRegion(String userId, String regionName) {
+        long id = Long.parseLong(userId);
+        Region region = regionController.getRegionByName(regionName);
+        if (this.usersRepository.contains(id)) {
+            User user = this.usersRepository.get(id);
+            user.setRegion(region);
+            this.usersRepository.change(user);
+        }
+    }
+
+    public void removeUser(String userId) {
         this.usersRepository.remove(Long.parseLong(userId));
+    }
+
+    public void removeAllUsers() {
+        this.usersRepository.removeAll();
     }
 
 
