@@ -34,13 +34,13 @@ public class UserController {
     }
 
     public void addUser(String firstName, String lastName, String regionName) {
-        Region region = regionController.getRegionByName(regionName);
+        Region region = regionController.getRegionByName(regionName).get();
         User   user   = new User(firstName, lastName, region);
         this.usersRepository.add(user);
     }
 
     public void addUser(String firstName, String lastName, String roleName, String regionName) {
-        Region region = regionController.getRegionByName(regionName);
+        Region region = regionController.getRegionByName(regionName).get();
         Role   role   = Role.valueOf(roleName);
         User   user   = new User(firstName, lastName, region, role);
         this.usersRepository.add(user);
@@ -108,9 +108,9 @@ public class UserController {
 
     public void changeUserRegion(String userId, String regionName) {
         long id = Long.parseLong(userId);
-        Region region = regionController.getRegionByName(regionName);
+        Region region = regionController.getRegionByName(regionName).get();
         if (this.usersRepository.contains(id)) {
-            User user = this.usersRepository.get(id);
+            User   user   = this.usersRepository.get(id);
             user.setRegion(region);
             this.usersRepository.change(user);
         }
