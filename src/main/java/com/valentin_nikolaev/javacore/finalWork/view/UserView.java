@@ -1,9 +1,6 @@
 package com.valentin_nikolaev.javacore.finalWork.view;
 
-import com.valentin_nikolaev.javacore.finalWork.view.UsersRequestsHandlers.AddRequestHandler;
-import com.valentin_nikolaev.javacore.finalWork.view.UsersRequestsHandlers.GetRequestHandler;
-import com.valentin_nikolaev.javacore.finalWork.view.UsersRequestsHandlers.HelpRequestHandler;
-import com.valentin_nikolaev.javacore.finalWork.view.UsersRequestsHandlers.RemoveRequestsHandler;
+import com.valentin_nikolaev.javacore.finalWork.view.UsersRequestsHandlers.*;
 
 import java.util.List;
 
@@ -14,7 +11,8 @@ public class UserView {
     public UserView() throws ClassNotFoundException {
         this.requestHandler = new HelpRequestHandler().setNextHandler(new AddRequestHandler())
                                                       .setNextHandler(new GetRequestHandler())
-                                                      .setNextHandler(new RemoveRequestsHandler());
+                                                      .setNextHandler(new RemoveRequestsHandler())
+                                                      .setNextHandler(new ChangeRequestHandler());
     }
 
     public void action(String action, List<String> options) throws ClassNotFoundException {
