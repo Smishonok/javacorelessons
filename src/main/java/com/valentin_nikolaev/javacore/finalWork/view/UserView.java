@@ -3,9 +3,12 @@ package com.valentin_nikolaev.javacore.finalWork.view;
 import com.valentin_nikolaev.javacore.finalWork.controller.RegionController;
 import com.valentin_nikolaev.javacore.finalWork.controller.UserController;
 import com.valentin_nikolaev.javacore.finalWork.models.Role;
+import com.valentin_nikolaev.javacore.finalWork.models.User;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static org.graalvm.compiler.options.OptionType.User;
 
 public class UserView {
 
@@ -18,6 +21,15 @@ public class UserView {
     private final String REMOVE = "remove";
 
     private final String HELP = "help";
+
+    //Get method options
+    private final String ID         = "id";
+    private final String ALL        = "all";
+    private final String FIRST_NAME = "name.first";
+    private final String LAST_NAME  = "name.last";
+    private final String ROLE       = "role";
+    private final String Region     = "region";
+
 
     public UserView() throws ClassNotFoundException {
         this.userController   = new UserController();
@@ -33,103 +45,77 @@ public class UserView {
                 addUser(options);
                 break;
             case GET:
-
-        }
-    }
-
-    private void getMainHelp() {
-        String helpInfo = "This is the part of the console app in which you can add, change and " +
-                "remove user data from repository. The main commands are:\n" +
-                "\tadd - adding new user;\n" + "\tget - getting user data from repository;\n" +
-                "\tchange - changing user data in repository\n" +
-                "\tremove - removing user from repository;\n" +
-                "\n\tCalling \"help\" after each of commands calls the help`s information for the" +
-                " corresponding command.";
-        System.out.println(helpInfo);
-    }
-
-    private void addUser(String[] userData) {
-        int userDataLength = userData.length;
-
-        if (userData.length == 1 && userData[0].equals(HELP)) {
-            userDataLength = - 1;
-        }
-        switch (userDataLength) {
-            case - 1:
-                getADDHelp();
+                getUserData(options);
                 break;
-            case 3:
-                addUser1(userData);
+            case CHANGE:
+
                 break;
-            case 4:
-                addUser2(userData);
+            case REMOVE:
+
                 break;
             default:
-                System.out.println(
-                        "Invalid user data. Pleas, check user data and try again, or call " +
-                                "\"add help\".");
-                break;
+                System.out.println("Invalid request type.\n");
+                getMainHelp();
         }
     }
 
     private void getUserData(String[] userData) {
+        int    requestLength = userData.length;
+        String request       = userData[0];
 
+        switch (request) {
+            case HELP:
+                getGETHelp();
+                break;
+            case ID:
+                if (userData.length == 2) {
+                    getUserByID(userData[1]);
+                } else {
+                    System.out.println("Invalid request format.\n");
+                    getGETHelp();
+                }
+                break;
+            case ALL:
+
+
+        }
     }
 
-    private void getADDHelp() {
+
+
+    private void getUserByID(String userId) {
+        if (! isLong(userId)) {
+            System.out.println(
+                    "The user`s id can be the only number like. Please, check the user`s id and try again.");
+            return;
+        }
+
+        Optional<User> user = this.userController.getUserById(userId);
+        if (user.isPresent()) {
+            System.out.println(user.get().toString());
+        } else {
+            System.out.println("The repository does not contain the user with ID: " + userId);
+        }
+    }
+
+    private void getGETHelp() {
         String helpInfo = "For adding user in repository it can be used two formats of data:\n" +
                 "\tVariant 1: [user first name] [user last name] [user region]\n" +
                 "\tVariant 2: [user first name] [user last name] [user role] [user region]\n" +
                 "For example:\n" + "\t Variant 1: Ivan Ivanov Moscow\n" +
                 "\t Variant 2: Ivan Ivanov admin Moscow\n";
+        System.out.println(helpInfo);
     }
 
-    private void addUser1(String[] userData) {
-        String userFirstName = userData[0];
-        String userLastName  = userData[1];
-        String regionName    = userData[2];
 
-        if (isRegionNameValid(regionName)) {
-            this.userController.addUser(userFirstName, userLastName, regionName);
-        } else {
-            System.out.println(
-                    "Invalid region name. The region with name: " + regionName + " is not " +
-                            "contains in the repository.");
+
+
+    private boolean isLong(String string) {
+        try {
+            Long.parseLong(string);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
-
-    private void addUser2(String[] userData) {
-        String userFirstName = userData[0];
-        String userLastName  = userData[1];
-        String userRole      = userData[2];
-        String regionName    = userData[3];
-
-        if (! isRegionNameValid(regionName)) {
-            System.out.println(
-                    "Invalid region name. The region with name: " + regionName + " is not " +
-                            "contains in the repository.");
-        }
-
-        if (! isRoleNameValid(userRole)) {
-            System.out.println("Invalid role name. User`s role can be:\n");
-            List<Role> userRoles = List.of(Role.values());
-            for (Role role : userRoles) {
-                System.out.println("\t" + role.toString());
-            }
-        }
-
-        if (isRegionNameValid(regionName) && isRoleNameValid(userRole)) {
-            this.userController.addUser(userFirstName, userLastName, userRole, regionName);
-        }
-    }
-
-    private boolean isRegionNameValid(String regionName) {
-        return this.regionController.getRegionByName(regionName).isPresent();
-    }
-
-    private boolean isRoleNameValid(String roleName) {
-        List<Role> roles = List.of(Role.values());
-        return roles.stream().anyMatch(role->role.toString().equals(roleName));
-    }
-
 }
