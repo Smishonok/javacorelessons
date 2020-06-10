@@ -142,8 +142,8 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     public boolean contains(Long id) {
         boolean isExist = false;
         try {
-            isExist = Files.lines(usersRepositoryPath).filter(
-                    userData->this.parseUserId(userData) == id).findFirst().isEmpty();
+            isExist = Files.lines(usersRepositoryPath).anyMatch(
+                    userData->this.parseUserId(userData) == id);
         } catch (IOException e) {
             log.error("Users`s repository file can`t be opened and read: " + e.getMessage());
         }

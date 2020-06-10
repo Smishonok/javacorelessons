@@ -137,8 +137,8 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
         boolean isExists = false;
 
         try {
-            isExists = Files.lines(regionRepositoryPath).filter(
-                    regionData->this.parseRegionId(regionData) == regionId).findFirst().isEmpty();
+            isExists = Files.lines(regionRepositoryPath).anyMatch(
+                    regionData->this.parseRegionId(regionData) == regionId);
         } catch (IOException e) {
             log.error("Can`t read repository file with region data: " + e.getMessage());
         }

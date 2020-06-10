@@ -156,8 +156,8 @@ public class JavaIOPostRepositoryImpl implements PostRepository {
     public boolean contains(Long postId) {
         boolean isExists = false;
         try {
-            isExists = Files.lines(postsRepositoryPath).filter(
-                    postData->parsePostId(postData) == postId).findAny().isEmpty();
+            isExists = Files.lines(postsRepositoryPath).anyMatch(
+                    postData->parsePostId(postData) == postId);
         } catch (IOException e) {
             log.error("Can`t read repository file with posts data: " + e.getMessage());
         }
