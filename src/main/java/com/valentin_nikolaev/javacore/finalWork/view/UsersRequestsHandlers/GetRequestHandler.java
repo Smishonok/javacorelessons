@@ -20,7 +20,7 @@ public class GetRequestHandler extends UserRequestHandler {
 
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {
-        if (ADD.equals(action)) {
+        if (GET.equals(action)) {
             this.userController = new UserController();
             String       requestType    = options.get(0);
             List<String> requestOptions = getOptionsWithOutFirst(options);
@@ -49,7 +49,7 @@ public class GetRequestHandler extends UserRequestHandler {
                 break;
             default:
                 System.out.println(
-                        "Invalid get request type. Pleas, check user request and try again, or " +
+                        "Invalid get request type. Please, check request and try again, or " +
                                 "call \"get help\".");
                 break;
         }
@@ -58,7 +58,8 @@ public class GetRequestHandler extends UserRequestHandler {
     private void getUserByID(String userId) {
         if (! isLong(userId)) {
             System.out.println(
-                    "The user`s id can be the only number like. Please, check the user`s id and try again.");
+                    "The user`s id should consist only of numbers. Please, check the user`s id " +
+                            "and try again.");
             return;
         }
 
@@ -102,12 +103,13 @@ public class GetRequestHandler extends UserRequestHandler {
                     break;
                 default:
                     System.out.println(
-                            "Invalid option type. Pleas, check option type and try " + "again.\n");
+                            "Invalid option type. Please, check option type and try " + "again.\n");
                     break;
             }
         } else {
-            System.out.println("Invalid request`s options format. Pleas, check options format and" +
-                                       " try again.\n");
+            System.out.println(
+                    "Invalid request`s options format. Please, check options format " + "and" +
+                            " try again.\n");
         }
     }
 
@@ -148,15 +150,16 @@ public class GetRequestHandler extends UserRequestHandler {
     }
 
     private void getHelpForGettingUserDataRequest() {
-        String helpInfo = "For getting user data from repository it can be used next formats of " +
-                "request:\n" + "\t1: id [id number] - return user data\n" +
-                "\t2: all - return list of all users in repository\n" + "\t3: all " + FIRST_NAME +
-                " [user first name] - return list of users with requested " + "user`s " +
-                "first name\n" + "\t4: all " + LAST_NAME +
-                " [user last name] - return list of users with requested user`s" + " last " +
-                "name\n" + "\t5: all " + ROLE +
-                " [role name] - return list of users with requested role\n" + "\t6: all " + REGION +
-                " [region name] - return list of users from requested region\n";
+        String helpInfo =
+                "For getting user`s data from the repository it can be used next formats of" + " " +
+                        "request:\n" + "\t1: id [id number] - return user data\n" +
+                        "\t2: all - return list of all users in repository\n" + "\t3: all " +
+                        FIRST_NAME + " [user first name] - return list of users with requested " +
+                        "user`s " + "first name\n" + "\t4: all " + LAST_NAME +
+                        " [user last name] - return list of users with requested user`s" +
+                        " last " + "name\n" + "\t5: all " + ROLE +
+                        " [role name] - return list of users with requested role\n" + "\t6: all " +
+                        REGION + " [region name] - return list of users from requested region\n";
 
         System.out.println(helpInfo);
     }

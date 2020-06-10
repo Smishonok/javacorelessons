@@ -2,7 +2,6 @@ package com.valentin_nikolaev.javacore.finalWork.view;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 public abstract class RequestHandler {
 

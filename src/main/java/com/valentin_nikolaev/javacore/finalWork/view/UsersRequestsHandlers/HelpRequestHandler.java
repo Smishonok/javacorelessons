@@ -1,9 +1,11 @@
 package com.valentin_nikolaev.javacore.finalWork.view.UsersRequestsHandlers;
 
+import java.util.List;
+
 public class HelpRequestHandler extends UserRequestHandler {
 
     @Override
-    public void handleRequest(String action, String[] options) throws ClassNotFoundException {
+    public void handleRequest(String action, List<String> options) throws ClassNotFoundException {
         if (HELP.equals(action)) {
             String helpInfo =
                     "This is the part of the console app in which you can add, change and " +
