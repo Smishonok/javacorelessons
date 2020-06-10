@@ -109,33 +109,10 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
                                      .collect(Collectors.toList()));
     }
 
-    private void rewriteInRepository(List<String> usersList) {
-        try (BufferedWriter writer = Files.newBufferedWriter(usersRepositoryPath,
-                                                             Charset.forName("UTF-8"),
-                                                             StandardOpenOption.WRITE)) {
-            for (String userData : usersList) {
-                writer.write(userData);
-            }
-        } catch (IOException e) {
-            log.error("Can`t write in repository file with users data: " + e.getMessage());
-        }
-    }
-
     @Override
     public void remove(Long id) {
         List<String> usersList = getUsersListExcludeUserWith(id);
         rewriteInRepository(usersList);
-    }
-
-    private List<String> getUsersListExcludeUserWith(long id) {
-        List<String> usersList = new ArrayList<>();
-        try {
-            usersList = Files.lines(usersRepositoryPath, Charset.forName("UTF-8")).filter(
-                    usersData->this.parseUserId(usersData) != id).collect(Collectors.toList());
-        } catch (IOException e) {
-            log.error("Can`t read repository file with users data: " + e.getMessage());
-        }
-        return usersList;
     }
 
     @Override
@@ -162,7 +139,7 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public boolean isExists(Long id) {
+    public boolean contains(Long id) {
         boolean isExist = false;
         try {
             isExist = Files.lines(usersRepositoryPath).filter(
@@ -171,6 +148,29 @@ public class JavaIOUserRepositoryImpl implements UserRepository {
             log.error("Users`s repository file can`t be opened and read: " + e.getMessage());
         }
         return isExist;
+    }
+
+    private void rewriteInRepository(List<String> usersList) {
+        try (BufferedWriter writer = Files.newBufferedWriter(usersRepositoryPath,
+                                                             Charset.forName("UTF-8"),
+                                                             StandardOpenOption.WRITE)) {
+            for (String userData : usersList) {
+                writer.write(userData);
+            }
+        } catch (IOException e) {
+            log.error("Can`t write in repository file with users data: " + e.getMessage());
+        }
+    }
+
+    private List<String> getUsersListExcludeUserWith(long id) {
+        List<String> usersList = new ArrayList<>();
+        try {
+            usersList = Files.lines(usersRepositoryPath, Charset.forName("UTF-8")).filter(
+                    usersData->this.parseUserId(usersData) != id).collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Can`t read repository file with users data: " + e.getMessage());
+        }
+        return usersList;
     }
 
     private String prepareDataForSerialisation(User user) {

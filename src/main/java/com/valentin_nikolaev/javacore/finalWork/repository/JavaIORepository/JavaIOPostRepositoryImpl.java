@@ -153,7 +153,7 @@ public class JavaIOPostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public boolean isExists(Long postId) {
+    public boolean contains(Long postId) {
         boolean isExists = false;
         try {
             isExists = Files.lines(postsRepositoryPath).filter(

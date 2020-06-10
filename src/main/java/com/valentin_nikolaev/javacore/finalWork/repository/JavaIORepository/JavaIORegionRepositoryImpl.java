@@ -133,7 +133,7 @@ public class JavaIORegionRepositoryImpl implements RegionRepository {
     }
 
     @Override
-    public boolean isExists(Long regionId) {
+    public boolean contains(Long regionId) {
         boolean isExists = false;
 
         try {
