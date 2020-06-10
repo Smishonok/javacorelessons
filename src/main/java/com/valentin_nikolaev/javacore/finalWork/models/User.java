@@ -29,7 +29,7 @@ public class User {
     }
 
     public User(long id, String firstName, String lastName, Region region, Role role,
-                 List<Post> posts) {
+                List<Post> posts) {
         this.id        = id;
         this.firstName = firstName;
         this.lastName  = lastName;
@@ -106,5 +106,12 @@ public class User {
         User comparingObj = (User) obj;
         return this.firstName.equals(comparingObj.firstName) && this.lastName.equals(
                 comparingObj.lastName) && this.role.toString().equals(comparingObj.role.toString());
+    }
+
+    @Override
+    public String toString() {
+        return "User`s id: " + this.id + " User`s first name: " + this.firstName +
+                " User`s last name: " + this.lastName + " User`s role: " + this.role.toString() +
+                " " + "User`s region: " + this.region.getName() + ";";
     }
 }
