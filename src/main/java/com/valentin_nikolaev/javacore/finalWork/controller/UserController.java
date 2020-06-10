@@ -123,8 +123,4 @@ public class UserController {
     public void removeAllUsers() {
         this.usersRepository.removeAll();
     }
-
-
-
-
 }
