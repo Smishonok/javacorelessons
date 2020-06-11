@@ -8,6 +8,14 @@ import java.util.List;
 
 public abstract class UserRequestHandler extends RequestHandler {
 
+    //Parameters of the method
+    protected final String ID         = "id";
+    protected final String ALL        = "all";
+    protected final String FIRST_NAME = "name.first";
+    protected final String LAST_NAME  = "name.last";
+    protected final String ROLE       = "role";
+    protected final String REGION     = "region";
+
     @Override
     public void getHelp() {
         String helpInfo = "Invalid request type, please check request type and try again.\n" +

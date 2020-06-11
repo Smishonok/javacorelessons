@@ -84,4 +84,9 @@ public class Region {
         Region comparingObj = (Region) obj;
         return this.name.equals(comparingObj.name);
     }
+
+    @Override
+    public String toString() {
+        return "Region id: "+this.id+" Region name: "+this.name;
+    }
 }

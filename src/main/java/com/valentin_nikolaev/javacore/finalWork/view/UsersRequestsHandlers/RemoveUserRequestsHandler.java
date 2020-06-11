@@ -8,9 +8,6 @@ public class RemoveUserRequestsHandler extends UserRequestHandler {
 
     private UserController userController;
 
-    private final String ID  = "id";
-    private final String ALL = "all";
-
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {
         if (REMOVE.equals(action)) {

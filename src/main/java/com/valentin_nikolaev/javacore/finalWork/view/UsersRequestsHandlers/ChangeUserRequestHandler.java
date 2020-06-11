@@ -8,13 +8,6 @@ public class ChangeUserRequestHandler extends UserRequestHandler {
 
     private UserController userController;
 
-    //Parameters of the method to change user`s data
-    private final String ID         = "id";
-    private final String FIRST_NAME = "name.first";
-    private final String LAST_NAME  = "name.last";
-    private final String ROLE       = "role";
-    private final String REGION     = "region";
-
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {
         if (CHANGE.equals(action)) {

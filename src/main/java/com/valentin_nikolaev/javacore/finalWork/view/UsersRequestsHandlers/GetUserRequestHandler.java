@@ -8,29 +8,26 @@ import java.util.Optional;
 
 public class GetUserRequestHandler extends UserRequestHandler {
 
-    //Parameters of the method to get user`s data
-    private final String ID         = "id";
-    private final String ALL        = "all";
-    private final String FIRST_NAME = "name.first";
-    private final String LAST_NAME  = "name.last";
-    private final String ROLE       = "role";
-    private final String REGION     = "region";
-
     private UserController userController;
 
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {
         if (GET.equals(action)) {
             this.userController = new UserController();
-            String       requestType    = options.get(0);
-            List<String> requestOptions = getOptionsWithOutFirst(options);
-            getUserData(requestType, requestOptions);
+            getUserData(options);
         } else {
             getNextHandler(action, options);
         }
     }
 
-    private void getUserData(String requestType, List<String> requestOptions) {
+    private void getUserData(List<String> options) {
+        String       requestType    = "";
+        if (options.size() != 0) {
+            requestType = options.get(0);
+        }
+
+        List<String> requestOptions = getOptionsWithOutFirst(options);
+
         switch (requestType) {
             case HELP:
                 getHelpForGettingUserDataRequest();

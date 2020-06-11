@@ -4,6 +4,11 @@ import com.valentin_nikolaev.javacore.finalWork.view.RequestHandler;
 
 public abstract class RegionRequestHandler extends RequestHandler {
 
+    //Parameters of the method
+    protected final String ID   = "id";
+    protected final String NAME = "name";
+    protected final String ALL = "all";
+
     @Override
     public void getHelp() {
         String helpInfo = "Invalid request type, please check request type and try again.\n" +
