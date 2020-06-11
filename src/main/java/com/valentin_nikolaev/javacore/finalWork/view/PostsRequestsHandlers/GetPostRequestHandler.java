@@ -36,7 +36,7 @@ public class GetPostRequestHandler extends PostRequestHandler {
                 getHelpForAddingPostRequest();
                 break;
             case USER_ID:
-                addUser(requestOptions);
+                addPost(requestOptions);
                 break;
             default:
                 System.out.println("Invalid request type. Please, check request type and try " +
@@ -46,7 +46,7 @@ public class GetPostRequestHandler extends PostRequestHandler {
         }
     }
 
-    private void addUser(List<String> requestOptions) {
+    private void addPost(List<String> requestOptions) {
         if (checkRequestOptions(requestOptions)) {
             String userIdValue = requestOptions.get(0);
             String content = requestOptions.get(1);
