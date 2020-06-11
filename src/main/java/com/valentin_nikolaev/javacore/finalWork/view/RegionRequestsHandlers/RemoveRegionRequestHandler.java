@@ -37,7 +37,9 @@ public class RemoveRegionRequestHandler extends RegionRequestHandler {
                 removeAllRegions();
                 break;
             default:
-
+                System.out.println(
+                        "Invalid request type. Please, check request and try again, or " +
+                                "call \""+REMOVE+" "+HELP+"\".");
                 break;
         }
     }

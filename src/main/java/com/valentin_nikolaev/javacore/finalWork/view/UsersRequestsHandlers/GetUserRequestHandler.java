@@ -46,7 +46,7 @@ public class GetUserRequestHandler extends UserRequestHandler {
             default:
                 System.out.println(
                         "Invalid get request type. Please, check request and try again, or " +
-                                "call \"get help\".");
+                                "call \""+GET+" "+HELP+"\".");
                 break;
         }
     }
