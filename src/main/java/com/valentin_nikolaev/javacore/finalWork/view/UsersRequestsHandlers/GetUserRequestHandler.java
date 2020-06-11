@@ -6,7 +6,7 @@ import com.valentin_nikolaev.javacore.finalWork.models.User;
 import java.util.List;
 import java.util.Optional;
 
-public class GetRequestHandler extends UserRequestHandler {
+public class GetUserRequestHandler extends UserRequestHandler {
 
     //Parameters of the method to get user`s data
     private final String ID         = "id";

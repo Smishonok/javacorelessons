@@ -4,7 +4,7 @@ import com.valentin_nikolaev.javacore.finalWork.controller.UserController;
 
 import java.util.List;
 
-public class ChangeRequestHandler extends UserRequestHandler {
+public class ChangeUserRequestHandler extends UserRequestHandler {
 
     private UserController userController;
 
@@ -66,7 +66,7 @@ public class ChangeRequestHandler extends UserRequestHandler {
                 changeUserRole(userId, parameterValue);
                 break;
             default:
-                System.out.println("Invalid changing parameter name. Check parameter name and try" +
+                System.out.println("Invalid parameter name. Check parameter name and try" +
                                            " again, or get help information.");
                 break;
         }

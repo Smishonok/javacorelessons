@@ -5,6 +5,12 @@ import java.util.List;
 
 public abstract class RequestHandler {
 
+    protected final String ADD    = "add";
+    protected final String GET    = "get";
+    protected final String CHANGE = "change";
+    protected final String REMOVE = "remove";
+    protected final String HELP   = "help";
+
     private RequestHandler nextRequestHandler;
 
     public abstract void handleRequest(String action, List<String> options)
@@ -42,5 +48,7 @@ public abstract class RequestHandler {
         }
         return optionsListWithOutFirst;
     }
+
+
 
 }

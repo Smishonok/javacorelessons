@@ -6,7 +6,7 @@ import com.valentin_nikolaev.javacore.finalWork.models.Role;
 
 import java.util.List;
 
-public class AddRequestHandler extends UserRequestHandler {
+public class AddUserRequestHandler extends UserRequestHandler {
 
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {

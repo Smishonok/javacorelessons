@@ -9,10 +9,10 @@ public class UserView {
     private RequestHandler requestHandler;
 
     public UserView() throws ClassNotFoundException {
-        this.requestHandler = new HelpRequestHandler().setNextHandler(new AddRequestHandler())
-                                                      .setNextHandler(new GetRequestHandler())
-                                                      .setNextHandler(new RemoveRequestsHandler())
-                                                      .setNextHandler(new ChangeRequestHandler());
+        this.requestHandler = new HelpUserRequestHandler().setNextHandler(new AddUserRequestHandler())
+                                                          .setNextHandler(new GetUserRequestHandler())
+                                                          .setNextHandler(new RemoveUserRequestsHandler())
+                                                          .setNextHandler(new ChangeUserRequestHandler());
     }
 
     public void action(String action, List<String> options) throws ClassNotFoundException {

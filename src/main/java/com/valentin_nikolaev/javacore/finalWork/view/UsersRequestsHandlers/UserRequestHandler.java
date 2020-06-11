@@ -8,12 +8,6 @@ import java.util.List;
 
 public abstract class UserRequestHandler extends RequestHandler {
 
-    protected final String ADD    = "add";
-    protected final String GET    = "get";
-    protected final String CHANGE = "change";
-    protected final String REMOVE = "remove";
-    protected final String HELP   = "help";
-
     @Override
     public void getHelp() {
         String helpInfo = "Invalid request type, please check request type and try again.\n" +

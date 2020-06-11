@@ -4,7 +4,7 @@ import com.valentin_nikolaev.javacore.finalWork.controller.UserController;
 
 import java.util.List;
 
-public class RemoveRequestsHandler extends UserRequestHandler {
+public class RemoveUserRequestsHandler extends UserRequestHandler {
 
     private UserController userController;
 
