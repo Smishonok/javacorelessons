@@ -49,6 +49,13 @@ public abstract class RequestHandler {
         return optionsListWithOutFirst;
     }
 
-
+    protected boolean isLong(String string) {
+        try {
+            Long.parseLong(string);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 
 }

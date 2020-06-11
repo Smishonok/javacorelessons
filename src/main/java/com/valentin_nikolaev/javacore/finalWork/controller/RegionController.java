@@ -70,7 +70,8 @@ public class RegionController {
         }
     }
 
-    public void removeRegionWithId(Long id) {
+    public void removeRegionWithId(String regionId) {
+        long id = Long.parseLong(regionId);
         log.debug("Removing the region with name '" + id + "' from repository.");
         regionRepository.remove(id);
         log.debug("Removing operation is ended.");

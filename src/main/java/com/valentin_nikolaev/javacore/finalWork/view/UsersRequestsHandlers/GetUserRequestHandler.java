@@ -63,7 +63,7 @@ public class GetUserRequestHandler extends UserRequestHandler {
         if (user.isPresent()) {
             System.out.println(user.get().toString());
         } else {
-            System.out.println("The repository does not contain the user with ID: " + userId);
+            System.out.println("The repository does not contain the user with ID: " + userId+'\n');
         }
     }
 

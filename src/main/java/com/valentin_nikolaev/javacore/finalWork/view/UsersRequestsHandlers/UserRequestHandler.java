@@ -39,13 +39,4 @@ public abstract class UserRequestHandler extends RequestHandler {
         List<Role> roles = List.of(Role.values());
         return roles.stream().anyMatch(role->role.toString().equals(roleName));
     }
-
-    protected boolean isLong(String string) {
-        try {
-            Long.parseLong(string);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
 }
