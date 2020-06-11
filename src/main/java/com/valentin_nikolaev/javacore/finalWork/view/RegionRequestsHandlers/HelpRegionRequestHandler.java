@@ -9,7 +9,7 @@ public class HelpRegionRequestHandler extends RegionRequestHandler {
         if (HELP.equals(action)) {
             String helpInfo =
                     "This is the part of the console app in which you can add, change and " +
-                            "remove user data from repository. The main commands are:\n" +
+                            "remove regions data from repository. The main commands are:\n" +
                             "\tadd - adding new region;\n" +
                             "\tget - getting region data from repository;\n" +
                             "\tchange - changing region data in repository;\n" +

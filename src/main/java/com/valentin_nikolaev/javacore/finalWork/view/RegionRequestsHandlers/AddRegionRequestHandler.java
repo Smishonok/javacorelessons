@@ -36,7 +36,6 @@ public class AddRegionRequestHandler extends RegionRequestHandler {
     private void getHelpForAddingRegionDataRequest() {
         String helpInfo = "For adding regions into the repository it can be used next formats of" +
                 "request:\n" + "\t1: " + ADD + " [region name]";
-
         System.out.println(helpInfo);
     }
 }
