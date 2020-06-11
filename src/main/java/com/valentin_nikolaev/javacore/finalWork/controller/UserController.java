@@ -18,11 +18,9 @@ public class UserController {
     static Logger log = Logger.getLogger(UserController.class.getName());
 
     private UserRepository   usersRepository;
-    private PostController   postController;
     private RegionController regionController;
 
     public UserController() throws ClassNotFoundException {
-        this.postController   = new PostController();
         this.regionController = new RegionController();
         initUserRepository();
     }

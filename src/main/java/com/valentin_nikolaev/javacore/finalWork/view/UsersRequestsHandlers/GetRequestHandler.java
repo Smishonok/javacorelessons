@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class GetRequestHandler extends UserRequestHandler {
 
-    //Get method options
+    //Parameters of the method to get user`s data
     private final String ID         = "id";
     private final String ALL        = "all";
     private final String FIRST_NAME = "name.first";
@@ -30,8 +30,7 @@ public class GetRequestHandler extends UserRequestHandler {
         }
     }
 
-    private void getUserData(String requestType, List<String> requestOptions)
-            throws ClassNotFoundException {
+    private void getUserData(String requestType, List<String> requestOptions) {
         switch (requestType) {
             case HELP:
                 getHelpForGettingUserDataRequest();
