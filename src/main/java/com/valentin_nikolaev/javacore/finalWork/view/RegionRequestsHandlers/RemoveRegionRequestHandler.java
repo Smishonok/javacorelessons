@@ -1,12 +1,19 @@
 package com.valentin_nikolaev.javacore.finalWork.view.RegionRequestsHandlers;
 
 import com.valentin_nikolaev.javacore.finalWork.controller.RegionController;
+import com.valentin_nikolaev.javacore.finalWork.view.RequestHandler;
 
 import java.util.List;
 
 public class RemoveRegionRequestHandler extends RegionRequestHandler {
 
     private RegionController regionController;
+
+    public RemoveRegionRequestHandler(){}
+
+    public RemoveRegionRequestHandler(RequestHandler nextRequestHandler) {
+        super(nextRequestHandler);
+    }
 
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {

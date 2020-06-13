@@ -9,12 +9,9 @@ public class PostView {
     private RequestHandler requestHandler;
 
     public PostView() throws ClassNotFoundException {
-        this.requestHandler = new AddPostRequestHandler().setNextHandler(
-                new GetPostRequestHandler()).setNextHandler(new ChangePostRequestHandler())
-                                                         .setNextHandler(
-                                                                 new RemovePostRequestHandler())
-                                                         .setNextHandler(
-                                                                 new HelpPostRequestHandler());
+        this.requestHandler = new HelpPostRequestHandler(new AddPostRequestHandler(
+                new ChangePostRequestHandler(
+                        new GetPostRequestHandler(new RemovePostRequestHandler()))));
     }
 
     public void action(String action, List<String> options) throws ClassNotFoundException {

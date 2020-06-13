@@ -1,8 +1,17 @@
 package com.valentin_nikolaev.javacore.finalWork.view.PostsRequestsHandlers;
 
+import com.valentin_nikolaev.javacore.finalWork.view.RequestHandler;
+
 import java.util.List;
 
 public class HelpPostRequestHandler extends PostRequestHandler {
+
+    public HelpPostRequestHandler(){}
+
+    public HelpPostRequestHandler(RequestHandler nextRequestHandler) {
+        super(nextRequestHandler);
+    }
+
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {
         if (HELP.equals(action)) {

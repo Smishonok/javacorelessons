@@ -9,12 +9,9 @@ public class RegionView {
     private RequestHandler requestHandler;
 
     public RegionView() throws ClassNotFoundException {
-        this.requestHandler = new AddRegionRequestHandler().setNextHandler(
-                new HelpRegionRequestHandler()).setNextHandler(new GetRegionRequestHandler())
-                                                           .setNextHandler(
-                                                                   new RemoveRegionRequestHandler())
-                                                           .setNextHandler(
-                                                                   new ChangeRegionRequestHandler());
+        this.requestHandler = new HelpRegionRequestHandler(new AddRegionRequestHandler(
+                new ChangeRegionRequestHandler(
+                        new GetRegionRequestHandler(new RemoveRegionRequestHandler()))));
     }
 
     public void action(String action, List<String> options) throws ClassNotFoundException {

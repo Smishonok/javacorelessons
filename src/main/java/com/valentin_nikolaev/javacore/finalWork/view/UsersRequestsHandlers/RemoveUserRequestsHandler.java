@@ -1,12 +1,19 @@
 package com.valentin_nikolaev.javacore.finalWork.view.UsersRequestsHandlers;
 
 import com.valentin_nikolaev.javacore.finalWork.controller.UserController;
+import com.valentin_nikolaev.javacore.finalWork.view.RequestHandler;
 
 import java.util.List;
 
 public class RemoveUserRequestsHandler extends UserRequestHandler {
 
     private UserController userController;
+
+    public RemoveUserRequestsHandler(){}
+
+    public RemoveUserRequestsHandler(RequestHandler nextRequestHandler) {
+        super(nextRequestHandler);
+    }
 
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {

@@ -1,8 +1,16 @@
 package com.valentin_nikolaev.javacore.finalWork.view.UsersRequestsHandlers;
 
+import com.valentin_nikolaev.javacore.finalWork.view.RequestHandler;
+
 import java.util.List;
 
 public class HelpUserRequestHandler extends UserRequestHandler {
+
+    public HelpUserRequestHandler(){}
+
+    public HelpUserRequestHandler(RequestHandler nextRequestHandler) {
+        super(nextRequestHandler);
+    }
 
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {

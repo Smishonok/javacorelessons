@@ -1,8 +1,16 @@
 package com.valentin_nikolaev.javacore.finalWork.view.RegionRequestsHandlers;
 
+import com.valentin_nikolaev.javacore.finalWork.view.RequestHandler;
+
 import java.util.List;
 
 public class HelpRegionRequestHandler extends RegionRequestHandler {
+
+    public HelpRegionRequestHandler(){}
+
+    public HelpRegionRequestHandler(RequestHandler nextRequestHandler) {
+        super(nextRequestHandler);
+    }
 
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {

@@ -2,6 +2,7 @@ package com.valentin_nikolaev.javacore.finalWork.view.UsersRequestsHandlers;
 
 import com.valentin_nikolaev.javacore.finalWork.controller.UserController;
 import com.valentin_nikolaev.javacore.finalWork.models.User;
+import com.valentin_nikolaev.javacore.finalWork.view.RequestHandler;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,12 @@ import java.util.Optional;
 public class GetUserRequestHandler extends UserRequestHandler {
 
     private UserController userController;
+
+    public GetUserRequestHandler(){}
+
+    public GetUserRequestHandler(RequestHandler nextRequestHandler) {
+        super(nextRequestHandler);
+    }
 
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {

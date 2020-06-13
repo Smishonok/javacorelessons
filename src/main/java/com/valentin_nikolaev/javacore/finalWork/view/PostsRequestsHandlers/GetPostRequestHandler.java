@@ -3,6 +3,7 @@ package com.valentin_nikolaev.javacore.finalWork.view.PostsRequestsHandlers;
 import com.valentin_nikolaev.javacore.finalWork.controller.PostController;
 import com.valentin_nikolaev.javacore.finalWork.controller.UserController;
 import com.valentin_nikolaev.javacore.finalWork.models.User;
+import com.valentin_nikolaev.javacore.finalWork.view.RequestHandler;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,12 @@ public class GetPostRequestHandler extends PostRequestHandler {
 
     private PostController postController;
     private UserController userController;
+
+    public GetPostRequestHandler(){}
+
+    public GetPostRequestHandler(RequestHandler nextRequestHandler) {
+        super(nextRequestHandler);
+    }
 
     @Override
     public void handleRequest(String action, List<String> options) throws ClassNotFoundException {

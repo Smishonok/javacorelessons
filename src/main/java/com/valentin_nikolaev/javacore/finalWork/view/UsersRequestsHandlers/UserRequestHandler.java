@@ -16,6 +16,12 @@ public abstract class UserRequestHandler extends RequestHandler {
     protected final String ROLE       = "role";
     protected final String REGION     = "region";
 
+    public UserRequestHandler() {}
+
+    public UserRequestHandler(RequestHandler nextRequestHandler) {
+        super(nextRequestHandler);
+    }
+
     @Override
     public void getHelp() {
         String helpInfo = "Invalid request type, please check request type and try again.\n" +
