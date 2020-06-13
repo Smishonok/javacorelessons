@@ -2,7 +2,6 @@ package com.valentin_nikolaev.javacore.finalWork.models;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Formatter;
 
 public class Post implements Comparable<Post> {
     private long          id;
@@ -11,10 +10,10 @@ public class Post implements Comparable<Post> {
     private LocalDateTime created;
     private LocalDateTime updated;
 
-    private static long groupID = 0;
+    private static long lastPostId = 0;
 
     public Post(Long userId, String content) {
-        this.id      = ++ groupID;
+        this.id      = ++ lastPostId;
         this.userId  = userId;
         this.content = content;
         this.created = LocalDateTime.now();

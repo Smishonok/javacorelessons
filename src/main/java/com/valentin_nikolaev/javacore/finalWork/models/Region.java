@@ -6,10 +6,10 @@ public class Region {
     private long   id;
     private String name;
 
-    private static long groupId = 0;
+    private static long lastRegionId = 0;
 
     public Region(String name) {
-        this.id   = ++ groupId;
+        this.id   = ++ lastRegionId;
         this.name = name;
     }
 

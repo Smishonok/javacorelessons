@@ -11,11 +11,11 @@ public class User {
     private Role   role;
     List<Post> posts;
 
-    private static long groupId = 0;
-    private final  Role DEFAULT = Role.USER;
+    private static long lastUserId = 0;
+    private final  Role DEFAULT    = Role.USER;
 
     public User(String firstName, String lastName, Region region) {
-        this.id        = ++ groupId;
+        this.id        = ++ lastUserId;
         this.firstName = firstName;
         this.lastName  = lastName;
         this.region    = region;
