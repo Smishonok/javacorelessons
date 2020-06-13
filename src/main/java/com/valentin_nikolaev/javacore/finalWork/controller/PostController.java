@@ -41,10 +41,9 @@ public class PostController {
 
     public Optional<Post> getPost(String postId) {
         long           id   = Long.parseLong(postId);
-        Optional<Post> post = Optional.empty();
-        if (this.postRepository.contains(id)) {
-            post = Optional.of(this.postRepository.get(id));
-        }
+        Optional<Post> post = this.postRepository.contains(id) ? Optional.of(
+                this.postRepository.get(id)) : Optional.empty();
+
         return post;
     }
 

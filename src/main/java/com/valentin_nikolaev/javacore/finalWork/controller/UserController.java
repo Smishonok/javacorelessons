@@ -46,10 +46,9 @@ public class UserController {
 
     public Optional<User> getUserById(String id) {
         long           userId = Long.parseLong(id);
-        Optional<User> user   = Optional.empty();
-        if (this.usersRepository.contains(userId)) {
-            user = Optional.of(this.usersRepository.get(userId));
-        }
+        Optional<User> user = this.usersRepository.contains(userId) ? Optional.of(
+                this.usersRepository.get(userId)) : Optional.empty();
+
         return user;
     }
 

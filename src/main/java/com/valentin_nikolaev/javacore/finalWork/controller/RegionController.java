@@ -15,7 +15,7 @@ public class RegionController {
 
     static Logger log = Logger.getLogger(RegionController.class.getName());
 
-    private RegionRepository    regionRepository;
+    private RegionRepository regionRepository;
 
     public RegionController() throws ClassNotFoundException {
         initRegionRepository();
@@ -36,15 +36,13 @@ public class RegionController {
 
     public Optional<Region> getRegionById(String regionId) {
         long id = Long.parseLong(regionId);
-        Optional<Region> region = Optional.empty();
-        if (this.regionRepository.contains(id)) {
-            region = Optional.of(this.regionRepository.get(id));
-        }
+        Optional<Region> region = this.regionRepository.contains(id) ? Optional.of(
+                this.regionRepository.get(id)) : Optional.empty();
+
         return region;
     }
 
     public Optional<Region> getRegionByName(String regionName) {
-        Optional<Region> requestedRegion = Optional.empty();
         List<Region>     regionsList     = this.regionRepository.getAll();
 
         int indexOfRequestedRegion = - 1;
@@ -54,10 +52,8 @@ public class RegionController {
             }
         }
 
-        if (indexOfRequestedRegion != - 1) {
-            requestedRegion = Optional.of(regionsList.get(indexOfRequestedRegion));
-        }
-
+        Optional<Region> requestedRegion = indexOfRequestedRegion != 1 ? Optional.of(
+                regionsList.get(indexOfRequestedRegion)) : Optional.empty();
         return requestedRegion;
     }
 
