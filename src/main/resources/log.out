@@ -1,7 +1,0 @@
-Try to read data from file: "src\main\resources\testFile.txt"
-Check the buffer size.
-Buffer was resized.
-Try to read data from file: "src\main\resources\testFile.txt"
-Check the buffer size.
-Buffer was resized.
-Starting the closing file procedure.
