@@ -5,14 +5,11 @@ public class Main {
         Server server = new Server();
 
         Client client1 = new Client(1);
-        Client client2 = new Client(2);
 
-        client1.getThread().join();
-        client2.getThread().join();
+        //client1.getThread().join();
 
 
-        Thread.sleep(1000);
-        server.stop();
+        //server.stop();
 
 
     }
