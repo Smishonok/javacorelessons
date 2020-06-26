@@ -2,6 +2,7 @@ package com.valentin_nikolaev.javacore.channels;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.channels.SocketChannel;
 import java.util.Random;
 
 public class Client implements Runnable {
@@ -30,12 +31,17 @@ public class Client implements Runnable {
                  BufferedInputStream inputStream = new BufferedInputStream(socket.getInputStream());
                  BufferedOutputStream outputStream = new BufferedOutputStream(
                          socket.getOutputStream())) {
-                String userMassage = clientMessages[random.nextInt(5)];
-                System.out.println(
-                        "Client №" + this.clientNumber + " send message: " + userMassage);
-                outputStream.write(userMassage.getBytes());
-                String serverMessage = new String(inputStream.readAllBytes());
-                System.out.println(serverMessage);
+                SocketChannel socketChannel = socket.getChannel();
+                while (socketChannel.isConnectionPending()) {
+                    if (socketChannel.isConnected()) {
+                        String userMassage = clientMessages[random.nextInt(5)];
+                        System.out.println(
+                                "Client №" + this.clientNumber + " send message: " + userMassage);
+                        outputStream.write(userMassage.getBytes());
+                        String serverMessage = new String(inputStream.readAllBytes());
+                        System.out.println(serverMessage);
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

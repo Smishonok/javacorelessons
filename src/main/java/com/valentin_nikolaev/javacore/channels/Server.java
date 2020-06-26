@@ -9,6 +9,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.SelectorProvider;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
@@ -32,7 +33,7 @@ public class Server implements Runnable {
         setUpServerEnvironment();
         this.serverResponseNumber = 0;
         this.thread               = new Thread(this, "Server");
-        this.thread.setDaemon(true);
+        //this.thread.setDaemon(true);
         this.thread.start();
     }
 
@@ -59,10 +60,11 @@ public class Server implements Runnable {
             System.out.println("Start to check selectable items.");
             try {
                 int keysCount = this.selector.select();
+                System.out.println("Keys in key set: " + keysCount);
                 if (keysCount != 0) {
-                    System.out.println(keysCount+" keys selected, start to process request.");
+                    System.out.println(keysCount + " keys selected, start to process request.");
                     Set<SelectionKey> keySet = this.selector.selectedKeys();
-                    processKeySet(keySet);
+                    handleKeySet(keySet);
                 }
             } catch (IOException e) {
                 System.err.println("Error during select.");
@@ -71,31 +73,42 @@ public class Server implements Runnable {
         }
     }
 
-    private void processKeySet(Set<SelectionKey> keySet) {
+    private void handleKeySet(Set<SelectionKey> keySet) {
         System.out.println("Process new key set.");
         Iterator<SelectionKey> keyIterator = keySet.iterator();
+
         while (keyIterator.hasNext()) {
             System.out.println("Get new key from set.");
             SelectionKey key = keyIterator.next();
             keyIterator.remove();
+            handleKey(key);
+        }
+    }
 
+    private void handleKey(SelectionKey key) {
+        if (key.isValid()) {
+            System.out.println("isAcceptable -" + key.isAcceptable());
+            System.out.println("isReadable -" + key.isReadable());
+            System.out.println("isWritable - " + key.isWritable());
+            System.out.println("isConnectable - " + key.isConnectable());
             acceptClient(key);
             readDataFromChannel(key);
             sendRequestToClient(key);
+        } else {
+            System.err.println("Invalid key selected.");
         }
     }
 
     private void acceptClient(SelectionKey key) {
         if (key.isAcceptable()) {
             try {
-                Socket        connectedSocket        = this.serverSocket.accept();
-                SocketChannel connectedSocketChannel = connectedSocket.getChannel();
-
-                if (connectedSocketChannel != null) {
-                    connectedSocketChannel.configureBlocking(false);
-                    connectedSocketChannel.register(this.selector, SelectionKey.OP_READ);
-                    System.out.println("Accepted!");
-                }
+                SocketChannel connectedSocketChannel = ((ServerSocketChannel) key.channel())
+                        .accept();
+                System.out.println(connectedSocketChannel);
+                connectedSocketChannel.configureBlocking(false);
+                connectedSocketChannel.register(this.selector, SelectionKey.OP_READ);
+                System.out.println("Accepted!");
+                System.out.println(connectedSocketChannel.isRegistered());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -106,17 +119,6 @@ public class Server implements Runnable {
         if (key.isReadable()) {
             System.out.println("Start to read.");
             SocketChannel client = (SocketChannel) key.channel();
-            try {
-                Socket socketToWrite = this.serverSocket.accept();
-                SocketChannel channelToWrite = socketToWrite.getChannel();
-
-                if (channelToWrite != null) {
-                    channelToWrite.configureBlocking(false);
-                    channelToWrite.register(this.selector, SelectionKey.OP_WRITE);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
             try {
                 System.out.println("Start to read from channel.");
@@ -129,7 +131,6 @@ public class Server implements Runnable {
                 }
                 this.clientMessage = clientData.toString();
                 System.out.println(this.clientMessage);
-                client.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
