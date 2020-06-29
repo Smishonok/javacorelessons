@@ -33,7 +33,7 @@ public class Server implements Runnable {
         setUpServerEnvironment();
         this.serverResponseNumber = 0;
         this.thread               = new Thread(this, "Server");
-        //this.thread.setDaemon(true);
+        this.thread.setDaemon(true);
         this.thread.start();
     }
 
@@ -74,14 +74,14 @@ public class Server implements Runnable {
     }
 
     private void handleKeySet(Set<SelectionKey> keySet) {
-        System.out.println("Process new key set.");
+        System.out.println("Process new key set. Keys number: "+ keySet.size());
         Iterator<SelectionKey> keyIterator = keySet.iterator();
 
         while (keyIterator.hasNext()) {
             System.out.println("Get new key from set.");
             SelectionKey key = keyIterator.next();
-            keyIterator.remove();
             handleKey(key);
+            keyIterator.remove();
         }
     }
 
@@ -91,9 +91,14 @@ public class Server implements Runnable {
             System.out.println("isReadable -" + key.isReadable());
             System.out.println("isWritable - " + key.isWritable());
             System.out.println("isConnectable - " + key.isConnectable());
+
+            System.out.println("Interest ops: " + key.interestOps());
+            System.out.println("Ready ops: "+key.readyOps());
+
+
             acceptClient(key);
             readDataFromChannel(key);
-            sendRequestToClient(key);
+            //sendRequestToClient(key);
         } else {
             System.err.println("Invalid key selected.");
         }
@@ -102,13 +107,11 @@ public class Server implements Runnable {
     private void acceptClient(SelectionKey key) {
         if (key.isAcceptable()) {
             try {
-                SocketChannel connectedSocketChannel = ((ServerSocketChannel) key.channel())
-                        .accept();
-                System.out.println(connectedSocketChannel);
+                ServerSocketChannel connectingSocketChannel = (ServerSocketChannel) key.channel();
+                SocketChannel connectedSocketChannel = connectingSocketChannel.accept();
                 connectedSocketChannel.configureBlocking(false);
                 connectedSocketChannel.register(this.selector, SelectionKey.OP_READ);
-                System.out.println("Accepted!");
-                System.out.println(connectedSocketChannel.isRegistered());
+                System.out.println("Channel accepted!");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -120,13 +123,16 @@ public class Server implements Runnable {
             System.out.println("Start to read.");
             SocketChannel client = (SocketChannel) key.channel();
 
+
             try {
                 System.out.println("Start to read from channel.");
                 StringBuilder clientData = new StringBuilder();
-                while (client.read(this.sharedBuffer) != - 1) {
+                while (client.read(this.sharedBuffer) != -1) {
                     this.sharedBuffer.flip();
-                    clientData.append(new String(
-                            Arrays.copyOf(this.sharedBuffer.array(), this.sharedBuffer.limit())));
+                    byte byteBuffer[] = new byte[this.sharedBuffer.remaining()];
+                    this.sharedBuffer.get(byteBuffer,0,this.sharedBuffer.limit());
+                    System.out.println("Server buffer size in use: "+byteBuffer.length);
+                    clientData.append(new String(byteBuffer));
                     this.sharedBuffer.clear();
                 }
                 this.clientMessage = clientData.toString();
@@ -134,6 +140,7 @@ public class Server implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
         }
     }
 
@@ -153,7 +160,12 @@ public class Server implements Runnable {
         }
     }
 
+    public Thread getThread() {
+        return thread;
+    }
+
     public Server stop() {
+        System.out.println("Start server stopping procedure.");
         this.isServerAlive = false;
         return this;
     }

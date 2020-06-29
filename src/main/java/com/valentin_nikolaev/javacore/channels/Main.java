@@ -6,11 +6,12 @@ public class Main {
 
         Client client1 = new Client(1);
 
-        //client1.getThread().join();
+        client1.getThread().join();
+        server.getThread().join();
 
 
-        //server.stop();
-
+        server.stop();
+        System.out.println("Server is alive: "+server.getThread().isAlive());
 
 
 

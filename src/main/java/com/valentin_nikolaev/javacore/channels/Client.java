@@ -2,6 +2,8 @@ package com.valentin_nikolaev.javacore.channels;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketOption;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Random;
 
@@ -26,32 +28,26 @@ public class Client implements Runnable {
     @Override
     public void run() {
         Random random = new Random();
-        for (int i = 0; i < 6; i++) {
-            try (Socket socket = new Socket("localHost", PORT);
-                 BufferedInputStream inputStream = new BufferedInputStream(socket.getInputStream());
-                 BufferedOutputStream outputStream = new BufferedOutputStream(
-                         socket.getOutputStream())) {
-                SocketChannel socketChannel = socket.getChannel();
-                while (socketChannel.isConnectionPending()) {
-                    if (socketChannel.isConnected()) {
-                        String userMassage = clientMessages[random.nextInt(5)];
-                        System.out.println(
-                                "Client №" + this.clientNumber + " send message: " + userMassage);
-                        outputStream.write(userMassage.getBytes());
-                        String serverMessage = new String(inputStream.readAllBytes());
-                        System.out.println(serverMessage);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        try (Socket socket = new Socket("localHost", PORT);
+             BufferedOutputStream outputStream = new BufferedOutputStream(
+                     socket.getOutputStream())) {
+            System.out.println("Status of socket connection: " + socket.isConnected());
+
+            if (socket.isConnected()) {
+                String clientMessage = clientMessages[random.nextInt(5)];
+                System.out.println(
+                        "Client №" + this.clientNumber + " send message: " + clientMessage);
+                outputStream.write(clientMessage.getBytes());
+                outputStream.flush();
+
             }
 
-            try {
-                this.thread.wait(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Thread.sleep(random.nextInt(500));
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
         }
+
 
     }
 
