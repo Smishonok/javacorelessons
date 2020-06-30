@@ -4,27 +4,26 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
 public class Server implements Runnable {
 
-    private          Thread              thread;
-    private          ByteBuffer          sharedBuffer;
-    private          ServerSocket        serverSocket;
-    private          ServerSocketChannel serverSocketChannel;
-    private          InetSocketAddress   serverInetAddress;
-    private          Selector            selector;
-    private          String              clientMessage;
-    private          int                 serverResponseNumber;
-    private volatile boolean             isServerAlive = true;
+    private          Thread     thread;
+    private          ByteBuffer sharedBuffer;
+    private          Selector   selector;
+    private          String     clientMessage;
+    private          int        serverResponseNumber;
+    private volatile boolean    isServerAlive = true;
 
     private final int SERVER_PORT = 5454;
     private final int BUFFER_SIZE = 1024;
@@ -33,20 +32,19 @@ public class Server implements Runnable {
         setUpServerEnvironment();
         this.serverResponseNumber = 0;
         this.thread               = new Thread(this, "Server");
-        this.thread.setDaemon(true);
         this.thread.start();
     }
 
     private void setUpServerEnvironment() {
         this.sharedBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
         try {
-            this.serverSocketChannel = ServerSocketChannel.open();
-            this.serverSocketChannel.configureBlocking(false);
-            this.serverSocket      = serverSocketChannel.socket();
-            this.serverInetAddress = new InetSocketAddress(SERVER_PORT);
-            this.serverSocket.bind(serverInetAddress);
+            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel.configureBlocking(false);
+            ServerSocket      serverSocket      = serverSocketChannel.socket();
+            InetSocketAddress serverInetAddress = new InetSocketAddress(SERVER_PORT);
+            serverSocket.bind(serverInetAddress);
             this.selector = Selector.open();
-            this.serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
+            serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
         } catch (IOException e) {
             System.err.println("Unable to setup environment.");
             System.exit(- 1);
@@ -74,7 +72,7 @@ public class Server implements Runnable {
     }
 
     private void handleKeySet(Set<SelectionKey> keySet) {
-        System.out.println("Process new key set. Keys number: "+ keySet.size());
+        System.out.println("Process new key set. Keys number: " + keySet.size());
         Iterator<SelectionKey> keyIterator = keySet.iterator();
 
         while (keyIterator.hasNext()) {
@@ -87,30 +85,33 @@ public class Server implements Runnable {
 
     private void handleKey(SelectionKey key) {
         if (key.isValid()) {
+            System.out.println("isValid - " + key.isValid());
             System.out.println("isAcceptable -" + key.isAcceptable());
             System.out.println("isReadable -" + key.isReadable());
             System.out.println("isWritable - " + key.isWritable());
             System.out.println("isConnectable - " + key.isConnectable());
 
-            System.out.println("Interest ops: " + key.interestOps());
-            System.out.println("Ready ops: "+key.readyOps());
-
+            System.out.println("key channel is open - " + key.channel().isOpen());
 
             acceptClient(key);
             readDataFromChannel(key);
-            //sendRequestToClient(key);
+            sendRequestToClient(key);
+
+
         } else {
             System.err.println("Invalid key selected.");
+            key.channel();
         }
     }
 
     private void acceptClient(SelectionKey key) {
         if (key.isAcceptable()) {
             try {
-                ServerSocketChannel connectingSocketChannel = (ServerSocketChannel) key.channel();
-                SocketChannel connectedSocketChannel = connectingSocketChannel.accept();
+                ServerSocketChannel socketChannel          = (ServerSocketChannel) key.channel();
+                SocketChannel       connectedSocketChannel = socketChannel.accept();
                 connectedSocketChannel.configureBlocking(false);
-                connectedSocketChannel.register(this.selector, SelectionKey.OP_READ);
+                connectedSocketChannel.register(this.selector,
+                                                SelectionKey.OP_READ );
                 System.out.println("Channel accepted!");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -123,37 +124,45 @@ public class Server implements Runnable {
             System.out.println("Start to read.");
             SocketChannel client = (SocketChannel) key.channel();
 
+            System.out.println("key channel is connected - " + client.isConnected());
 
             try {
                 System.out.println("Start to read from channel.");
                 StringBuilder clientData = new StringBuilder();
-                while (client.read(this.sharedBuffer) != -1) {
+
+                this.sharedBuffer.clear();
+                while (client.read(this.sharedBuffer) > 0) {
                     this.sharedBuffer.flip();
                     byte byteBuffer[] = new byte[this.sharedBuffer.remaining()];
-                    this.sharedBuffer.get(byteBuffer,0,this.sharedBuffer.limit());
-                    System.out.println("Server buffer size in use: "+byteBuffer.length);
+                    this.sharedBuffer.get(byteBuffer, 0, this.sharedBuffer.limit());
+                    System.out.println("Server buffer size in use: " + byteBuffer.length);
                     clientData.append(new String(byteBuffer));
                     this.sharedBuffer.clear();
                 }
+
                 this.clientMessage = clientData.toString();
-                System.out.println(this.clientMessage);
+                System.out.println("Client message saved by server.");
+                client.register(this.selector, SelectionKey.OP_WRITE);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
     }
 
     private void sendRequestToClient(SelectionKey key) {
         if (key.isWritable()) {
-            SocketChannel client = (SocketChannel) key.channel();
-            String serverResponse =
-                    this.serverResponseNumber + " Server response: \"Client message :" +
-                            this.clientMessage + "received.\"";
-            byte responseInBytes[] = serverResponse.getBytes();
-            this.sharedBuffer = ByteBuffer.wrap(responseInBytes);
             try {
+                SocketChannel client = (SocketChannel) key.channel();
+                client.register(this.selector, SelectionKey.OP_READ);
+
+
+                String serverResponse =
+                        ++ this.serverResponseNumber + " Server response: Client message: \"" +
+                                this.clientMessage + "\" received.";
+                byte responseInBytes[] = serverResponse.getBytes();
+                this.sharedBuffer = ByteBuffer.wrap(responseInBytes);
                 client.write(this.sharedBuffer);
+                this.sharedBuffer.clear();
             } catch (IOException e) {
                 System.err.println("Unable to write in chanel.");
             }
