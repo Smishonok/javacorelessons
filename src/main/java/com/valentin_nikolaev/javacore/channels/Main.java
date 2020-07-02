@@ -5,17 +5,19 @@ public class Main {
         Server server = new Server();
 
         Client client1 = new Client(1);
+        Client client2 = new Client(2);
+        Client client3 = new Client(3);
+        Client client4 = new Client(4);
+        Client client5 = new Client(5);
+        Client client6 = new Client(6);
 
-        server.getThread().join();
         client1.getThread().join();
+        client2.getThread().join();
+        client3.getThread().join();
+        client4.getThread().join();
+        client5.getThread().join();
+        client6.getThread().join();
 
-        client1.disconnect();
         server.stop();
-        System.out.println("Server is alive: "+server.getThread().isAlive());
-
-
-
     }
-
-
 }

@@ -14,11 +14,11 @@ import java.util.Set;
 
 public class Client implements Runnable {
 
-    private          int               clientNumber;
-    private          Thread            thread;
-    private          Random            random;
-    private          InetSocketAddress inetSocketAddress;
-    private          SocketChannel     socketChannel;
+    private int               clientNumber;
+    private Thread            thread;
+    private Random            random;
+    private InetSocketAddress inetSocketAddress;
+    private SocketChannel     socketChannel;
 
     private final int PORT = 5454;
 
@@ -38,32 +38,35 @@ public class Client implements Runnable {
     @Override
     public void run() {
         initiateSocketChannel();
-
         for (int i = 0; i < 6; i++) {
             sendMessage();
             receiveMessage();
         }
+        sendMessage("END");
 
         //disconnect();
     }
 
     private void sendMessage() {
+        String clientMessage =
+                "Client №" + this.clientNumber + ": " + clientMessages[random.nextInt(5)];
+        sendMessage(clientMessage);
+    }
+
+    private void sendMessage(String message) {
         try {
-            String     clientMessage = clientMessages[random.nextInt(5)];
-            ByteBuffer byteBuffer    = ByteBuffer.wrap(clientMessage.getBytes());
+            ByteBuffer byteBuffer = ByteBuffer.wrap(message.getBytes());
+            Thread.sleep(random.nextInt(1000));
             this.socketChannel.write(byteBuffer);
-            Thread.sleep(random.nextInt(500));
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            System.err.println("Message was not send to server: " + e.getMessage());
         }
     }
 
     private void receiveMessage() {
-        System.out.println("Client prepare to receive message from server.");
         StringBuilder serverMessage = new StringBuilder();
         ByteBuffer    buffer        = ByteBuffer.allocate(1024);
         try {
-            System.out.println("Client try to read data from channel.");
             socketChannel.read(buffer);
             buffer.flip();
             byte byteBuffer[] = new byte[buffer.remaining()];
@@ -71,9 +74,8 @@ public class Client implements Runnable {
             serverMessage.append(new String(byteBuffer));
             buffer.clear();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Message was not received from server: " + e.getMessage());
         }
-        System.out.println("Read operation is ended.");
         System.out.println(serverMessage.toString());
     }
 
@@ -95,9 +97,8 @@ public class Client implements Runnable {
         try {
             this.socketChannel.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Client`s socket was not closed: " + e.getMessage());
         }
-
         return this;
     }
 }

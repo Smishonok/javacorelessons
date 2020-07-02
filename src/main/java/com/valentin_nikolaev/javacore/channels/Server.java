@@ -18,12 +18,13 @@ import java.util.Set;
 
 public class Server implements Runnable {
 
-    private          Thread     thread;
-    private          ByteBuffer sharedBuffer;
-    private          Selector   selector;
-    private          String     clientMessage;
-    private          int        serverResponseNumber;
-    private volatile boolean    isServerAlive = true;
+    private          Thread       thread;
+    private          ByteBuffer   sharedBuffer;
+    private          Selector     selector;
+    private          ServerSocket serverSocket;
+    private          boolean      written       = true;
+    private          int          serverResponseNumber;
+    private volatile boolean      isServerAlive = true;
 
     private final int SERVER_PORT = 5454;
     private final int BUFFER_SIZE = 1024;
@@ -40,7 +41,7 @@ public class Server implements Runnable {
         try {
             ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.configureBlocking(false);
-            ServerSocket      serverSocket      = serverSocketChannel.socket();
+            this.serverSocket = serverSocketChannel.socket();
             InetSocketAddress serverInetAddress = new InetSocketAddress(SERVER_PORT);
             serverSocket.bind(serverInetAddress);
             this.selector = Selector.open();
@@ -54,29 +55,44 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
+        System.out.println("Server is started.");
         while (isServerAlive) {
-            System.out.println("Start to check selectable items.");
             try {
-                int keysCount = this.selector.select();
-                System.out.println("Keys in key set: " + keysCount);
+                int keysCount = this.selector.select(3000);
                 if (keysCount != 0) {
-                    System.out.println(keysCount + " keys selected, start to process request.");
                     Set<SelectionKey> keySet = this.selector.selectedKeys();
                     handleKeySet(keySet);
                 }
             } catch (IOException e) {
-                System.err.println("Error during select.");
-                e.printStackTrace();
+                System.err.println("Error during select: " + e.getMessage());
+                try {
+                    this.selector.close();
+                    this.serverSocket.close();
+                } catch (IOException ex) {
+                    System.err.println(
+                            "Server selector and socket was not closed: " + ex.getMessage());
+                }
+            }
+
+            if (! isServerAlive) {
+                try {
+                    this.selector.close();
+                    this.serverSocket.close();
+
+                    System.out.println("Server is stopped.");
+                } catch (IOException e) {
+                    System.err.println(
+                            "Server was not stopped, selector and serverSocket was not closed:" + " " +
+                                    e.getMessage());
+                }
             }
         }
     }
 
     private void handleKeySet(Set<SelectionKey> keySet) {
-        System.out.println("Process new key set. Keys number: " + keySet.size());
         Iterator<SelectionKey> keyIterator = keySet.iterator();
 
         while (keyIterator.hasNext()) {
-            System.out.println("Get new key from set.");
             SelectionKey key = keyIterator.next();
             handleKey(key);
             keyIterator.remove();
@@ -85,22 +101,12 @@ public class Server implements Runnable {
 
     private void handleKey(SelectionKey key) {
         if (key.isValid()) {
-            System.out.println("isValid - " + key.isValid());
-            System.out.println("isAcceptable -" + key.isAcceptable());
-            System.out.println("isReadable -" + key.isReadable());
-            System.out.println("isWritable - " + key.isWritable());
-            System.out.println("isConnectable - " + key.isConnectable());
-
-            System.out.println("key channel is open - " + key.channel().isOpen());
-
             acceptClient(key);
             readDataFromChannel(key);
             sendRequestToClient(key);
-
-
         } else {
             System.err.println("Invalid key selected.");
-            key.channel();
+            key.cancel();
         }
     }
 
@@ -111,61 +117,68 @@ public class Server implements Runnable {
                 SocketChannel       connectedSocketChannel = socketChannel.accept();
                 connectedSocketChannel.configureBlocking(false);
                 connectedSocketChannel.register(this.selector,
-                                                SelectionKey.OP_READ );
-                System.out.println("Channel accepted!");
+                                                SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+                System.out.println("New user added to the conversation!");
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println("Socket was not accepted: " + e.getMessage());
+                key.cancel();
             }
         }
     }
 
     private void readDataFromChannel(SelectionKey key) {
-        if (key.isReadable()) {
-            System.out.println("Start to read.");
+        if (key.isReadable() && written) {
             SocketChannel client = (SocketChannel) key.channel();
 
-            System.out.println("key channel is connected - " + client.isConnected());
-
+            StringBuilder clientData = new StringBuilder();
             try {
-                System.out.println("Start to read from channel.");
-                StringBuilder clientData = new StringBuilder();
-
-                this.sharedBuffer.clear();
                 while (client.read(this.sharedBuffer) > 0) {
                     this.sharedBuffer.flip();
                     byte byteBuffer[] = new byte[this.sharedBuffer.remaining()];
                     this.sharedBuffer.get(byteBuffer, 0, this.sharedBuffer.limit());
-                    System.out.println("Server buffer size in use: " + byteBuffer.length);
                     clientData.append(new String(byteBuffer));
                     this.sharedBuffer.clear();
                 }
-
-                this.clientMessage = clientData.toString();
-                System.out.println("Client message saved by server.");
-                client.register(this.selector, SelectionKey.OP_WRITE);
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println("Message was not read from channel: " + e.getMessage());
+                key.cancel();
+            }
+
+            if (! clientData.equals("END")) {
+                key.attach(clientData.toString());
+                this.written = false;
+            } else {
+                closeSocketChannel(key);
             }
         }
     }
 
     private void sendRequestToClient(SelectionKey key) {
-        if (key.isWritable()) {
+        if (key.isValid() && key.isWritable() && ! written) {
+            SocketChannel client = (SocketChannel) key.channel();
+            written = true;
             try {
-                SocketChannel client = (SocketChannel) key.channel();
-                client.register(this.selector, SelectionKey.OP_READ);
-
-
+                String userMessage = (String) key.attachment();
                 String serverResponse =
                         ++ this.serverResponseNumber + " Server response: Client message: \"" +
-                                this.clientMessage + "\" received.";
+                                userMessage + "\" received.";
                 byte responseInBytes[] = serverResponse.getBytes();
                 this.sharedBuffer = ByteBuffer.wrap(responseInBytes);
                 client.write(this.sharedBuffer);
                 this.sharedBuffer.clear();
             } catch (IOException e) {
-                System.err.println("Unable to write in chanel.");
+                System.err.println("Unable to write in chanel: " + e.getMessage());
+                key.cancel();
             }
+        }
+    }
+
+    private void closeSocketChannel(SelectionKey key) {
+        try {
+            key.channel().close();
+            key.cancel();
+        } catch (IOException e) {
+            System.err.println("Socket was not closed: " + e.getMessage());
         }
     }
 
@@ -176,6 +189,7 @@ public class Server implements Runnable {
     public Server stop() {
         System.out.println("Start server stopping procedure.");
         this.isServerAlive = false;
+        this.selector.wakeup();
         return this;
     }
 }
